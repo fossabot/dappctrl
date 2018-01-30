@@ -1,0 +1,3 @@
+{
+	"DBConnStr": "dbname=pxctrl sslmode=disable"
+}
