@@ -1,5 +1,9 @@
 package data
 
+import (
+	"time"
+)
+
 //go:generate reform
 
 //reform:services
@@ -44,5 +48,5 @@ type Session struct {
 //reform:vpn_sessions
 type VPNSession struct {
 	SessionID    string `reform:"session_id,pk"`
-	ConsumedMiBs int    `reform:"consumed_mibs"`
+	ConsumedMiBs *int   `reform:"consumed_mibs"`
 }

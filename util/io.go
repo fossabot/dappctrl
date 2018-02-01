@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 )
 
 // ReadJSONFile fills object with data from given JSON-file.
-func readJSONFile(name string, data interface{}) error {
+func ReadJSONFile(name string, data interface{}) error {
 	file, err := os.Open(name)
 	if err != nil {
 		return err
