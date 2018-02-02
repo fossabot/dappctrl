@@ -20,7 +20,11 @@ func NewDB(conf *Config, logger *util.Logger) (*DB, error) {
 	}
 
 	return (*DB)(reform.NewDB(conn,
-		postgresql.Dialect, reform.NewPrintfLogger(logger.Info))), nil
+		postgresql.Dialect, reform.NewPrintfLogger(logger.Debug))), nil
+}
+
+func (db *DB) Begin() (*reform.TX, error) {
+	return (*reform.DB)(db).Begin()
 }
 
 func (db *DB) Close() {

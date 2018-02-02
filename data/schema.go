@@ -40,13 +40,14 @@ type VPNPayment struct {
 
 //reform:sessions
 type Session struct {
-	ID      string     `reform:"id,pk"`
-	Started time.Time  `reform:"started"`
-	Ended   *time.Time `reform:"ended"`
+	ID        string    `reform:"id,pk"`
+	PaymentID string    `reform:"payment_id"`
+	Started   time.Time `reform:"started"`
+	Ended     time.Time `reform:"ended"`
 }
 
 //reform:vpn_sessions
 type VPNSession struct {
 	SessionID    string `reform:"session_id,pk"`
-	ConsumedMiBs *int   `reform:"consumed_mibs"`
+	ConsumedMiBs int    `reform:"consumed_mibs"`
 }

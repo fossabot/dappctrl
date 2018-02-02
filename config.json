@@ -6,6 +6,10 @@
         }
     },
 
+    "Log": {
+        "Level": "debug"
+    },
+
     "Serv": {
         "Addr": "localhost:8080"
     }
