@@ -1,20 +1,23 @@
-CREATE DOMAIN eth_addr AS bytea CHECK(octet_length(value) = 20);
-CREATE DOMAIN sha3_256 AS bytea CHECK(octet_length(value) = 32);
+CREATE DOMAIN eth_addr AS char(28); -- Base64 encoded 20 bytes.
+CREATE DOMAIN sha3_256 AS char(44); -- Base64 encoded 32 bytes.
+
+CREATE TYPE service_type AS ENUM ('VPN');
 
 CREATE TABLE services (
     id sha3_256 PRIMARY KEY,
-    so json NOT NULL
+    so json NOT NULL,
+    type service_type NOT NULL
 );
 
 CREATE TABLE vpn_services (
-    service_id sha3_256 PRIMARY KEY REFERENCES services (id)
-    out_speed_kibs int NOT NULL,
-    in_speed_kibs int NOT NULL
+    service_id sha3_256 PRIMARY KEY REFERENCES services (id),
+    down_speed_kibs int NOT NULL,
+    up_speed_kibs int NOT NULL
 );
 
 CREATE TABLE clients (
     id eth_addr PRIMARY KEY,
-    added timestamp NOT NULL
+    added timestamp with time zone NOT NULL
 );
 
 CREATE TABLE payments (
@@ -28,17 +31,22 @@ CREATE TABLE payments (
 
 CREATE TABLE vpn_payments (
     payment_id sha3_256 PRIMARY KEY REFERENCES payments (id),
-    total_mibs int NOT NULL
+    down_mibs int NOT NULL,
+    up_mibs int NOT NULL
 );
 
 CREATE TABLE sessions (
     id uuid PRIMARY KEY,
     payment_id sha3_256 NOT NULL REFERENCES payments (id),
-    started timestamp NOT NULL,
-    ended timestamp NOT NULL
+    server_ip inet,
+    client_ip inet,
+    client_port int,
+    started timestamp with time zone,
+    ended timestamp with time zone
 );
 
 CREATE TABLE vpn_sessions (
     session_id uuid PRIMARY KEY REFERENCES sessions (id),
-    consumed_mibs int NOT NULL
+    down_kibs int,
+    up_kibs int
 );

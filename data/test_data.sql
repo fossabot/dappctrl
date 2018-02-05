@@ -1,32 +1,34 @@
-INSERT INTO services (id, so) VALUES (
-    '\xEBC3A8C30D406AD273DB016BEB4FD271ECF548789A2203C3B6B1E09FF14A1E59',
-    '{"templateVersion": 1}'
+INSERT INTO services (id, so, type) VALUES (
+    '68Ooww1AatJz2wFr60/Scez1SHiaIgPDtrHgn/FKHlk=',
+    '{"templateVersion": 1}',
+    'VPN'
 );
 
 INSERT INTO vpn_services (
-    service_id, out_speed_kibs, in_speed_kibs) VALUES (
-    '\xEBC3A8C30D406AD273DB016BEB4FD271ECF548789A2203C3B6B1E09FF14A1E59',
+    service_id, down_speed_kibs, up_speed_kibs) VALUES (
+    '68Ooww1AatJz2wFr60/Scez1SHiaIgPDtrHgn/FKHlk=',
     2048,
     1024
 );
 
 INSERT INTO clients (id, added) VALUES (
-    '\x0F39AB07BCB375D6668B6C02BEDD30A355A632CD',
+    'DzmrB7yzddZmi2wCvt0wo1WmMs0=',
     '2018-01-01 00:00:00'
 );
 
 INSERT INTO payments (
     id, service_id, client_id, eth_block, solt, password) VALUES (
-    '\x798125022244F1F6B9E91C8CCB32DEA6C5AFC53E0E59F7DFD1917B2F4C57DCCF',
-    '\xEBC3A8C30D406AD273DB016BEB4FD271ECF548789A2203C3B6B1E09FF14A1E59',
-    '\x0F39AB07BCB375D6668B6C02BEDD30A355A632CD',
+    'eYElAiJE8fa56RyMyzLepsWvxT4OWfff0ZF7L0xX3M8=',
+    '68Ooww1AatJz2wFr60/Scez1SHiaIgPDtrHgn/FKHlk=',
+    'DzmrB7yzddZmi2wCvt0wo1WmMs0=',
     5012227,
     6012867121110302348,
     -- Password: secret
-    '\xED4F600B8019B1267D13C35A6D5930F271D19450897B4A3F621F6A32521A1808'
+    '7U9gC4AZsSZ9E8NabVkw8nHRlFCJe0o/Yh9qMlIaGAg='
 );
 
-INSERT INTO vpn_payments (payment_id, total_mibs) VALUES (
-    '\x798125022244F1F6B9E91C8CCB32DEA6C5AFC53E0E59F7DFD1917B2F4C57DCCF',
-    1024
+INSERT INTO vpn_payments (payment_id, down_mibs, up_mibs) VALUES (
+    'eYElAiJE8fa56RyMyzLepsWvxT4OWfff0ZF7L0xX3M8=',
+    1024,
+    256
 );

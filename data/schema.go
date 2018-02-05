@@ -6,15 +6,22 @@ import (
 
 //go:generate reform
 
+const (
+	ServiceTypeVPN = "VPN"
+)
+
 //reform:services
 type Service struct {
-	ID string `reform:"id,pk"`
-	SO string `reform:"so"`
+	ID   string `reform:"id,pk"`
+	SO   string `reform:"so"`
+	Type string `reform:"type"`
 }
 
 //reform:vpn_services
 type VPNService struct {
-	ServiceID string `reform:"service_id,pk"`
+	ServiceID     string `reform:"service_id,pk"`
+	DownSpeedKiBs int    `reform:"down_speed_kibs"`
+	UpSpeedKiBs   int    `reform:"up_speed_kibs"`
 }
 
 //reform:clients
@@ -35,19 +42,24 @@ type Payment struct {
 //reform:vpn_payments
 type VPNPayment struct {
 	PaymentID string `reform:"payment_id,pk"`
-	TotalMiBs int    `reform:"total_mibs"`
+	DownKiBs  int    `reform:"down_kibs"`
+	UpKiBs    int    `reform:"up_kibs"`
 }
 
 //reform:sessions
 type Session struct {
-	ID        string    `reform:"id,pk"`
-	PaymentID string    `reform:"payment_id"`
-	Started   time.Time `reform:"started"`
-	Ended     time.Time `reform:"ended"`
+	ID         string     `reform:"id,pk"`
+	PaymentID  string     `reform:"payment_id"`
+	ServerIP   *string    `reform:"server_ip"`
+	ClientIP   *string    `reform:"client_ip"`
+	ClientPort *uint16    `reform:"client_port"`
+	Started    *time.Time `reform:"started"`
+	Ended      *time.Time `reform:"ended"`
 }
 
 //reform:vpn_sessions
 type VPNSession struct {
-	SessionID    string `reform:"session_id,pk"`
-	ConsumedMiBs int    `reform:"consumed_mibs"`
+	SessionID string `reform:"session_id,pk"`
+	DownKiBs  *int   `reform:"down_kibs"`
+	UpKiBs    *int   `reform:"up_kibs"`
 }
