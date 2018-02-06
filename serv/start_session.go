@@ -8,18 +8,18 @@ import (
 	"time"
 )
 
-type StartSessionRequest struct {
+type startSessionRequest struct {
 	SessionID  string `json:"sessionId"`
 	ServerIP   string `json:"serverIp"`
 	ClientIP   string `json:"clientIp"`
 	ClientPort uint16 `json:"clientPort"`
 }
 
-type StartSessionReply struct {
+type startSessionReply struct {
 }
 
 func (s *Server) handleStartSession(w http.ResponseWriter, r *http.Request) {
-	var req StartSessionRequest
+	var req startSessionRequest
 	if !s.parseRequest(w, r, &req) {
 		return
 	}
@@ -41,6 +41,9 @@ func (s *Server) handleStartSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s.logger.Info("session peers: %s:%d -> %s",
+		req.ClientIP, req.ClientPort, req.ServerIP)
+
 	sess.ServerIP = pointer.ToString(req.ServerIP)
 	sess.ClientIP = pointer.ToString(req.ClientIP)
 	sess.ClientPort = pointer.ToUint16(req.ClientPort)
@@ -55,6 +58,9 @@ func (s *Server) handleStartSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.reply(w, StartSessionReply{})
-	tx.Commit()
+	if !s.commit(w, tx) {
+		return
+	}
+
+	s.reply(w, startSessionReply{})
 }

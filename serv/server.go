@@ -71,6 +71,7 @@ func (s *Server) findByPrimaryKey(
 		} else {
 			s.logger.Error("failed to search in %v: %s",
 				rec.Table().Name(), err)
+			w.WriteHeader(http.StatusInternalServerError)
 			s.reply(w, errorReply{internalFailure})
 		}
 		return false
@@ -82,6 +83,7 @@ func (s *Server) begin(w http.ResponseWriter) (*reform.TX, bool) {
 	tx, err := s.db.Begin()
 	if err != nil {
 		s.logger.Error("failed to begin transaction: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		s.reply(w, errorReply{internalFailure})
 		return nil, false
 	}
@@ -93,6 +95,7 @@ func (s *Server) insert(
 	if err := tx.Insert(rec); err != nil {
 		s.logger.Error("failed to insert into %s: %s",
 			rec.View().Name(), err)
+		w.WriteHeader(http.StatusInternalServerError)
 		s.reply(w, errorReply{internalFailure})
 		tx.Rollback()
 		return false
@@ -105,6 +108,18 @@ func (s *Server) save(
 	if err := tx.Save(rec); err != nil {
 		s.logger.Error("failed to save in %s: %s",
 			rec.View().Name(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		s.reply(w, errorReply{internalFailure})
+		tx.Rollback()
+		return false
+	}
+	return true
+}
+
+func (s *Server) commit(w http.ResponseWriter, tx *reform.TX) bool {
+	if err := tx.Commit(); err != nil {
+		s.logger.Error("failed to commit transaction: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		s.reply(w, errorReply{internalFailure})
 		tx.Rollback()
 		return false

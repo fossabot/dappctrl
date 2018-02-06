@@ -20,8 +20,8 @@ type Service struct {
 //reform:vpn_services
 type VPNService struct {
 	ServiceID     string `reform:"service_id,pk"`
-	DownSpeedKiBs int    `reform:"down_speed_kibs"`
-	UpSpeedKiBs   int    `reform:"up_speed_kibs"`
+	DownSpeedKiBs uint   `reform:"down_speed_kibs"`
+	UpSpeedKiBs   uint   `reform:"up_speed_kibs"`
 }
 
 //reform:clients
@@ -34,16 +34,16 @@ type Payment struct {
 	ID        string `reform:"id,pk"`
 	ServiceID string `reform:"service_id"`
 	ClientID  string `reform:"client_id"`
-	EthBlock  int    `reform:"eth_block"`
-	Solt      int64  `reform:"solt"`
+	EthBlock  uint   `reform:"eth_block"`
+	Solt      uint64 `reform:"solt"`
 	Password  string `reform:"password"`
 }
 
 //reform:vpn_payments
 type VPNPayment struct {
 	PaymentID string `reform:"payment_id,pk"`
-	DownKiBs  int    `reform:"down_kibs"`
-	UpKiBs    int    `reform:"up_kibs"`
+	DownKiBs  uint   `reform:"down_kibs"`
+	UpKiBs    uint   `reform:"up_kibs"`
 }
 
 //reform:sessions
@@ -60,6 +60,6 @@ type Session struct {
 //reform:vpn_sessions
 type VPNSession struct {
 	SessionID string `reform:"session_id,pk"`
-	DownKiBs  *int   `reform:"down_kibs"`
-	UpKiBs    *int   `reform:"up_kibs"`
+	DownKiBs  *uint  `reform:"down_kibs"`
+	UpKiBs    *uint  `reform:"up_kibs"`
 }
