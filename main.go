@@ -8,6 +8,8 @@ import (
 	"pxctrl/util"
 )
 
+//go:generate go generate pxctrl/data
+
 func main() {
 	fconfig := flag.String("config", "config.json", "Configuration file")
 	flag.Parse()
