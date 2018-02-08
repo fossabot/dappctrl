@@ -2,3 +2,5 @@
 .DS_Store
 
 *_reform.go
+.idea/*
+pxctrl.iml
