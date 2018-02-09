@@ -9,22 +9,23 @@ import (
 	"pxctrl/util"
 )
 
-type authRequest struct {
+type AuthRequest struct {
 	PaymentID       string `json:"paymentId"`
 	PaymentPassword string `json:"paymentPassword"`
 }
 
-type authReply struct {
-	SessionID string `json:"sessionId,omitempty"`
+type AuthReply struct {
+	ErrorReply
+	SessionID string `json:"sessionId"`
 }
 
 func authenticate(pmnt *data.Payment, pwd string) bool {
 	hash := sha3.Sum256([]byte(pwd + fmt.Sprint(pmnt.Solt)))
-	return base64.StdEncoding.EncodeToString(hash[:]) == pmnt.Password
+	return base64.URLEncoding.EncodeToString(hash[:]) == pmnt.Password
 }
 
 func (s *Server) handleAuthenticate(w http.ResponseWriter, r *http.Request) {
-	var req authRequest
+	var req AuthRequest
 	if !s.parseRequest(w, r, &req) {
 		return
 	}
@@ -39,7 +40,7 @@ func (s *Server) handleAuthenticate(w http.ResponseWriter, r *http.Request) {
 	if !authenticate(&pmnt, req.PaymentPassword) {
 		s.logger.Warn("payment password mismatch")
 		w.WriteHeader(http.StatusForbidden)
-		s.reply(w, errorReply{accessDenied})
+		s.reply(w, ErrorReply{ErrAccessDenied})
 		return
 	}
 
@@ -69,5 +70,5 @@ func (s *Server) handleAuthenticate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.reply(w, authReply{sess.ID})
+	s.reply(w, AuthReply{SessionID: sess.ID})
 }

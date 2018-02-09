@@ -17,5 +17,10 @@ func (c Config) ConnStr() string {
 }
 
 func NewConfig() *Config {
-	return &Config{}
+	return &Config{
+		Conn: map[string]string{
+			"dbname":  "pxctrl",
+			"sslmode": "disable",
+		},
+	}
 }

@@ -11,6 +11,9 @@
     },
 
     "Serv": {
-        "Addr": "localhost:8080"
+        "Addr": "0.0.0.0:8080",
+        "CertFile": "pxctrl.cert",
+        "KeyFile": "pxctrl.key",
+        "TLS": false
     }
 }

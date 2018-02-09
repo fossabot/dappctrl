@@ -8,18 +8,19 @@ import (
 	"time"
 )
 
-type startSessionRequest struct {
+type StartSessionRequest struct {
 	SessionID  string `json:"sessionId"`
 	ServerIP   string `json:"serverIp"`
 	ClientIP   string `json:"clientIp"`
 	ClientPort uint16 `json:"clientPort"`
 }
 
-type startSessionReply struct {
+type StartSessionReply struct {
+	ErrorReply
 }
 
 func (s *Server) handleStartSession(w http.ResponseWriter, r *http.Request) {
-	var req startSessionRequest
+	var req StartSessionRequest
 	if !s.parseRequest(w, r, &req) {
 		return
 	}
@@ -32,7 +33,7 @@ func (s *Server) handleStartSession(w http.ResponseWriter, r *http.Request) {
 	if sip == nil || sip.IsUnspecified() ||
 		cip == nil || cip.IsUnspecified() || req.ClientPort == 0 {
 		s.logger.Warn("malformed request")
-		s.reply(w, errorReply{malformedRequest})
+		s.reply(w, ErrorReply{ErrMalformedRequest})
 		return
 	}
 
@@ -62,5 +63,5 @@ func (s *Server) handleStartSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.reply(w, startSessionReply{})
+	s.reply(w, StartSessionReply{})
 }

@@ -1,5 +1,5 @@
-CREATE DOMAIN eth_addr AS char(28); -- Base64 encoded 20 bytes.
-CREATE DOMAIN sha3_256 AS char(44); -- Base64 encoded 32 bytes.
+CREATE DOMAIN eth_addr AS char(28); -- RFC-4648 base64 encoded 20 bytes.
+CREATE DOMAIN sha3_256 AS char(44); -- RFC-4648 base64 encoded 32 bytes.
 
 CREATE TYPE service_type AS ENUM ('VPN');
 

@@ -11,10 +11,11 @@ import (
 //go:generate go generate pxctrl/data
 
 func main() {
-	fconfig := flag.String("config", "config.json", "Configuration file")
+	fconfig := flag.String(
+		"config", "pxctrl.config.json", "Configuration file")
 	flag.Parse()
 
-	conf := NewConfig()
+	conf := newConfig()
 	if err := util.ReadJSONFile(*fconfig, &conf); err != nil {
 		log.Fatalf("failed to read configuration: %s\n", err)
 	}

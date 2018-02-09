@@ -6,14 +6,14 @@ import (
 	"pxctrl/util"
 )
 
-type Config struct {
+type config struct {
 	Data *data.Config
 	Log  *util.LogConfig
 	Serv *serv.Config
 }
 
-func NewConfig() *Config {
-	return &Config{
+func newConfig() *config {
+	return &config{
 		Data: data.NewConfig(),
 		Log:  util.NewLogConfig(),
 		Serv: serv.NewConfig(),

@@ -7,17 +7,18 @@ import (
 	"time"
 )
 
-type stopSessionRequest struct {
+type StopSessionRequest struct {
 	SessionID string `json:"sessionId"`
 	DownKiBs  uint   `json:"downKibs"`
 	UpKiBs    uint   `json:"upKibs"`
 }
 
-type stopSessionReply struct {
+type StopSessionReply struct {
+	ErrorReply
 }
 
 func (s *Server) handleStopSession(w http.ResponseWriter, r *http.Request) {
-	var req stopSessionRequest
+	var req StopSessionRequest
 	if !s.parseRequest(w, r, &req) {
 		return
 	}
@@ -57,5 +58,5 @@ func (s *Server) handleStopSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.reply(w, stopSessionReply{})
+	s.reply(w, StopSessionReply{})
 }
