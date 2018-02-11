@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -11,6 +12,7 @@ import (
 	"path/filepath"
 	"pxctrl/serv"
 	"pxctrl/util"
+	"strconv"
 )
 
 type config struct {
@@ -61,16 +63,12 @@ func main() {
 	case "client-disconnect":
 		handleDisconnect(conf)
 	default:
-		log.Fatalf("unknown script_type")
+		log.Fatalf("unsupported script_type")
 	}
 }
 
-func getUsername() string {
-	return os.Getenv("username")
-}
-
 func getCreds() (string, string) {
-	user := getUsername()
+	user := os.Getenv("username")
 	pass := os.Getenv("password")
 
 	if len(user) != 0 && len(pass) != 0 {
@@ -123,12 +121,29 @@ func post(conf *config, path string, req interface{}, rep interface{}) {
 	}
 }
 
-func storeSession(conf *config, user, session string) {
-	name := filepath.Join(conf.SessionDir, user)
+func commonName() string {
+	cn := os.Getenv("common_name")
+	if len(cn) == 0 {
+		log.Fatalf("empty common_name")
+	}
+	return base64.URLEncoding.EncodeToString([]byte(cn))
+}
+
+func storeSession(conf *config, session string) {
+	name := filepath.Join(conf.SessionDir, commonName())
 	err := ioutil.WriteFile(name, []byte(session), sessPerm)
 	if err != nil {
 		log.Fatalf("failed to store session: %s", err)
 	}
+}
+
+func loadSession(conf *config) string {
+	name := filepath.Join(conf.SessionDir, commonName())
+	data, err := ioutil.ReadFile(name)
+	if err != nil {
+		log.Fatalf("failed to load session: %s", err)
+	}
+	return string(data)
 }
 
 func handleAuth(conf *config) {
@@ -142,13 +157,49 @@ func handleAuth(conf *config) {
 		log.Fatalf("failed to authenticate %s: %s", user, rep.Error)
 	}
 
-	storeSession(conf, user, rep.SessionID)
+	storeSession(conf, rep.SessionID)
 }
 
 func handleConnect(conf *config) {
+	port, err := strconv.Atoi(os.Getenv("trusted_port"))
+	if err != nil || port <= 0 || port > 0xFFFF {
+		log.Fatalf("bad trusted_port value")
+	}
 
+	req := serv.StartSessionRequest{
+		SessionID:  loadSession(conf),
+		ServerIP:   os.Getenv("ifconfig_remote"),
+		ClientIP:   os.Getenv("trusted_ip"),
+		ClientPort: uint16(port),
+	}
+
+	var rep serv.StartSessionReply
+	post(conf, serv.PathStartSession, req, &rep)
+	if len(rep.Error) != 0 {
+		log.Fatalf("failed to start session: %s", rep.Error)
+	}
 }
 
 func handleDisconnect(conf *config) {
+	down, err := strconv.Atoi(os.Getenv("bytes_sent"))
+	if err != nil || down < 0 {
+		log.Fatalf("bad bytes_sent value")
+	}
 
+	up, err := strconv.Atoi(os.Getenv("bytes_received"))
+	if err != nil || up < 0 {
+		log.Fatalf("bad bytes_received value")
+	}
+
+	req := serv.StopSessionRequest{
+		SessionID: loadSession(conf),
+		DownKiBs:  uint(down / 1024),
+		UpKiBs:    uint(up / 1024),
+	}
+
+	var rep serv.StopSessionReply
+	post(conf, serv.PathStopSession, req, &rep)
+	if len(rep.Error) != 0 {
+		log.Fatalf("failed to stop session: %s", rep.Error)
+	}
 }
