@@ -1,6 +1,6 @@
 {
     "LogFile": "fxtrig.log",
-    "ServerAddr": "localhost:8080",
-    "ServerTLS": false,
+    "PxctrlAddr": "localhost:8080",
+    "PxctrlTLS": false,
     "SessionDir": "sessions"
 }

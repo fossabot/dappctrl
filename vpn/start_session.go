@@ -1,4 +1,4 @@
-package serv
+package vpn
 
 import (
 	"github.com/AlekSi/pointer"

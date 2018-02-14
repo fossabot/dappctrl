@@ -10,10 +10,10 @@
         "Level": "info"
     },
 
-    "Serv": {
-        "Addr": "0.0.0.0:8080",
+    "VPN": {
         "CertFile": "pxctrl.cert",
         "KeyFile": "pxctrl.key",
-        "TLS": false
+        "ServerAddr": "0.0.0.0:8080",
+        "ServerTLS": false
     }
 }

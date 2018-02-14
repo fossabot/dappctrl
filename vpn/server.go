@@ -1,4 +1,4 @@
-package serv
+package vpn
 
 import (
 	"database/sql"
@@ -37,16 +37,16 @@ func NewServer(conf *Config, logger *util.Logger, db *data.DB) *Server {
 	return &Server{conf, logger, db}
 }
 
-func (s *Server) ListenAndServ() error {
+func (s *Server) ListenAndServe() error {
 	http.HandleFunc(PathAuthenticate, s.handleAuthenticate)
 	http.HandleFunc(PathStartSession, s.handleStartSession)
 	http.HandleFunc(PathStopSession, s.handleStopSession)
 
-	if s.conf.TLS {
+	if s.conf.ServerTLS {
 		return http.ListenAndServeTLS(
-			s.conf.Addr, s.conf.CertFile, s.conf.KeyFile, nil)
+			s.conf.ServerAddr, s.conf.CertFile, s.conf.KeyFile, nil)
 	} else {
-		return http.ListenAndServe(s.conf.Addr, nil)
+		return http.ListenAndServe(s.conf.ServerAddr, nil)
 	}
 }
 

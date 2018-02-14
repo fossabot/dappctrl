@@ -1,4 +1,4 @@
-package serv
+package vpn
 
 import (
 	"encoding/base64"

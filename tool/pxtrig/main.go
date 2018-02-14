@@ -10,24 +10,24 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"pxctrl/serv"
 	"pxctrl/util"
+	"pxctrl/vpn"
 	"strconv"
 )
 
 type config struct {
 	LogFile    string
-	ServerAddr string
-	ServerTLS  bool
+	PxctrlAddr string
+	PxctrlTLS  bool
 	SessionDir string
 }
 
 func newConfig() *config {
-	conf := serv.NewConfig()
+	conf := vpn.NewConfig()
 	return &config{
 		LogFile:    "fxtrig.log",
-		ServerAddr: conf.Addr,
-		ServerTLS:  conf.TLS,
+		PxctrlAddr: conf.Addr,
+		PxctrlTLS:  conf.TLS,
 		SessionDir: "sessions",
 	}
 }
@@ -105,11 +105,11 @@ func post(conf *config, path string, req interface{}, rep interface{}) {
 	}
 
 	var proto = "http"
-	if conf.ServerTLS {
+	if conf.PxctrlTLS {
 		proto += "s"
 	}
 
-	resp, err := http.Post(proto+"://"+conf.ServerAddr+path,
+	resp, err := http.Post(proto+"://"+conf.PxctrlAddr+path,
 		"application/json", bytes.NewReader(data))
 	if err != nil {
 		log.Fatalf("failed to post request: %s", err)
@@ -149,10 +149,10 @@ func loadSession(conf *config) string {
 func handleAuth(conf *config) {
 	user, pass := getCreds()
 
-	req := serv.AuthRequest{PaymentID: user, PaymentPassword: pass}
+	req := vpn.AuthRequest{PaymentID: user, PaymentPassword: pass}
 
-	var rep serv.AuthReply
-	post(conf, serv.PathAuthenticate, req, &rep)
+	var rep vpn.AuthReply
+	post(conf, vpn.PathAuthenticate, req, &rep)
 	if len(rep.Error) != 0 {
 		log.Fatalf("failed to authenticate %s: %s", user, rep.Error)
 	}
@@ -166,15 +166,15 @@ func handleConnect(conf *config) {
 		log.Fatalf("bad trusted_port value")
 	}
 
-	req := serv.StartSessionRequest{
+	req := vpn.StartSessionRequest{
 		SessionID:  loadSession(conf),
-		ServerIP:   os.Getenv("ifconfig_remote"),
+		PxctrlIP:   os.Getenv("ifconfig_remote"),
 		ClientIP:   os.Getenv("trusted_ip"),
 		ClientPort: uint16(port),
 	}
 
-	var rep serv.StartSessionReply
-	post(conf, serv.PathStartSession, req, &rep)
+	var rep vpn.StartSessionReply
+	post(conf, vpn.PathStartSession, req, &rep)
 	if len(rep.Error) != 0 {
 		log.Fatalf("failed to start session: %s", rep.Error)
 	}
@@ -191,14 +191,14 @@ func handleDisconnect(conf *config) {
 		log.Fatalf("bad bytes_received value")
 	}
 
-	req := serv.StopSessionRequest{
+	req := vpn.StopSessionRequest{
 		SessionID: loadSession(conf),
 		DownKiBs:  uint(down / 1024),
 		UpKiBs:    uint(up / 1024),
 	}
 
-	var rep serv.StopSessionReply
-	post(conf, serv.PathStopSession, req, &rep)
+	var rep vpn.StopSessionReply
+	post(conf, vpn.PathStopSession, req, &rep)
 	if len(rep.Error) != 0 {
 		log.Fatalf("failed to stop session: %s", rep.Error)
 	}

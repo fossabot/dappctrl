@@ -4,8 +4,8 @@ import (
 	"flag"
 	"log"
 	"pxctrl/data"
-	"pxctrl/serv"
 	"pxctrl/util"
+	"pxctrl/vpn"
 )
 
 //go:generate go generate pxctrl/data
@@ -31,9 +31,9 @@ func main() {
 	}
 	defer db.Close()
 
-	server := serv.NewServer(conf.Serv, logger, db)
+	server := vpn.NewServer(conf.VPN, logger, db)
 
-	if err := server.ListenAndServ(); err != nil {
-		logger.Fatal("failed to listen and serve: %s\n", err)
+	if err := server.ListenAndServe(); err != nil {
+		logger.Fatal("failed to start VPN session server: %s\n", err)
 	}
 }
