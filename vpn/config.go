@@ -1,16 +1,20 @@
 package vpn
 
 type Config struct {
-	ServerAddr string
-	CertFile   string
-	KeyFile    string
-	ServerTLS  bool
+	ByteCountSecs int
+	CertFile      string
+	ControlAddr   string
+	KeyFile       string
+	ServerAddr    string
+	ServerTLS     bool
 }
 
 func NewConfig() *Config {
 	return &Config{
-		ServerAddr: "localhost:8080",
-		CertFile:   "pxctrl.cert",
-		KeyFile:    "pxctrl.key",
+		ByteCountSecs: 5,
+		CertFile:      "pxctrl.cert",
+		ControlAddr:   "localhost:7505",
+		KeyFile:       "pxctrl.key",
+		ServerAddr:    "localhost:8080",
 	}
 }
