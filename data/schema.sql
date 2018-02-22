@@ -1,52 +1,89 @@
-CREATE DOMAIN eth_addr AS char(28); -- RFC-4648 base64 encoded 20 bytes.
-CREATE DOMAIN sha3_256 AS char(44); -- RFC-4648 base64 encoded 32 bytes.
-
-CREATE TYPE service_type AS ENUM ('VPN');
-
-CREATE TABLE services (
-    id sha3_256 PRIMARY KEY,
-    so json NOT NULL,
-    type service_type NOT NULL
+-- Subjects are party in distributed trade.
+-- Each of them can play an agent role, a client role, or both of them.
+CREATE TABLE subjects (
+    id uuid PRIMARY KEY,
+    public_key text NOT NULL,
+    private_key text
 );
 
-CREATE TABLE vpn_services (
-    service_id sha3_256 PRIMARY KEY REFERENCES services (id),
-    down_speed_kibs int NOT NULL,
-    up_speed_kibs int NOT NULL
+-- Service types.
+CREATE TYPE service AS ENUM ('vpn');
+
+-- Service offerings.
+CREATE TABLE offerings(
+    id uuid PRIMARY KEY,
+    agent uuid NOT NULL REFERENCES subjects(id),
+    service service NOT NULL,
+    supply int NOT NULL,
+    signature text NOT NULL
 );
 
-CREATE TABLE clients (
-    id eth_addr PRIMARY KEY,
-    added timestamp with time zone NOT NULL
+-- SHA3-256 in base64 (RFC-4648).
+CREATE DOMAIN sha3_256 AS char(44);
+
+ -- Ethereum's uint192 in base64 (RFC-4648).
+CREATE DOMAIN privatix_tokens AS char(32);
+
+-- VPN protocols.
+CREATE TYPE protocol AS ENUM ('tcp', 'udp');
+
+-- VPN service offerings.
+CREATE TABLE offerings_vpn(
+    id uuid PRIMARY KEY REFERENCES offerings(id),
+    hash sha3_256 NOT NULL,
+    country char(2) NOT NULL,
+    upload_price privatix_tokens NOT NULL,
+    download_price privatix_tokens NOT NULL,
+    min_upload bigint NOT NULL,
+    max_upload bigint NOT NULL,
+    min_download bigint NOT NULL,
+    max_download bigint NOT NULL,
+    billing_interval int NOT NULL,
+    billing_deviation int NOT NULL,
+    free_intervals smallint NOT NULL,
+    min_upload_bps bigint NOT NULL,
+    min_download_bps bigint NOT NULL,
+    template_version smallint NOT NULL,
+    protocol protocol NOT NULL
 );
 
-CREATE TABLE payments (
-    id sha3_256 PRIMARY KEY,
-    service_id sha3_256 NOT NULL REFERENCES services (id),
-    client_id eth_addr NOT NULL REFERENCES clients (id),
-    eth_block int NOT NULL,
+-- State channel states.
+CREATE TYPE channel_state AS ENUM (
+    'open',
+    'closed_coop',
+    'closed_uncoop'
+);
+
+-- State channels.
+CREATE TABLE channels (
+    id uuid PRIMARY KEY,
+    agent uuid NOT NULL REFERENCES subjects(id),
+    client uuid NOT NULL REFERENCES subjects(id),
+    offering uuid NOT NULL REFERENCES offerings(id),
+    block int NOT NULL,
+    state channel_state NOT NULL,
+    total_deposit privatix_tokens NOT NULL,
+    closed_deposit privatix_tokens NOT NULL,
     solt bigint NOT NULL,
-    password sha3_256 NOT NULL
+    password sha3_256 NOT NULL,
+    receipt_balance privatix_tokens NOT NULL,
+    receipt_signature text NOT NULL
 );
 
-CREATE TABLE vpn_payments (
-    payment_id sha3_256 PRIMARY KEY REFERENCES payments (id),
-    down_mibs int NOT NULL,
-    up_mibs int NOT NULL
-);
-
+-- Client sessions.
 CREATE TABLE sessions (
     id uuid PRIMARY KEY,
-    payment_id sha3_256 NOT NULL REFERENCES payments (id),
+    channel uuid NOT NULL REFERENCES channels(id),
+    started timestamp with time zone,
+    stopped timestamp with time zone
+);
+
+-- Client sessions for VPN service.
+CREATE TABLE sessions_vpn (
+    id uuid PRIMARY KEY REFERENCES sessions(id),
     server_ip inet,
     client_ip inet,
     client_port int,
-    started timestamp with time zone,
-    ended timestamp with time zone
-);
-
-CREATE TABLE vpn_sessions (
-    session_id uuid PRIMARY KEY REFERENCES sessions (id),
-    down_kibs int,
-    up_kibs int
+    uploaded bigint NOT NULL,
+    downloaded bigint NOT NULL
 );
