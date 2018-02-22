@@ -7,26 +7,30 @@ import (
 	"strings"
 )
 
+// Logger to log internal events.
 type Logger struct {
 	logger *log.Logger
 	level  int
 }
 
+// LogConfig is a logger configuration.
 type LogConfig struct {
 	Level string
 }
 
+// Log levels.
 const (
-	LOG_DEBUG   = iota
-	LOG_INFO    = iota
-	LOG_WARNING = iota
-	LOG_ERROR   = iota
-	LOG_FATAL   = iota
+	LogDebug   = iota
+	LogInfo    = iota
+	LogWarning = iota
+	LogError   = iota
+	LogFatal   = iota
 )
 
+// NewLogConfig creates a default log configuration.
 func NewLogConfig() *LogConfig {
 	return &LogConfig{
-		Level: logLevelStrs[LOG_INFO],
+		Level: logLevelStrs[LogInfo],
 	}
 }
 
@@ -34,24 +38,25 @@ var logLevelStrs = []string{"DEBUG", "INFO", "WARNING", "ERROR", "FATAL"}
 
 func parseLogLevel(lvl string) int {
 	switch strings.ToUpper(lvl) {
-	case logLevelStrs[LOG_DEBUG]:
-		return LOG_DEBUG
-	case logLevelStrs[LOG_INFO]:
-		return LOG_INFO
-	case logLevelStrs[LOG_WARNING]:
-		return LOG_WARNING
-	case logLevelStrs[LOG_ERROR]:
-		return LOG_ERROR
-	case logLevelStrs[LOG_FATAL]:
-		return LOG_FATAL
+	case logLevelStrs[LogDebug]:
+		return LogDebug
+	case logLevelStrs[LogInfo]:
+		return LogInfo
+	case logLevelStrs[LogWarning]:
+		return LogWarning
+	case logLevelStrs[LogError]:
+		return LogError
+	case logLevelStrs[LogFatal]:
+		return LogFatal
 	}
 
 	return -1
 }
 
+// NewLogger creates a new logger.
 func NewLogger(conf *LogConfig) (*Logger, error) {
 	lvl := parseLogLevel(conf.Level)
-	if lvl < LOG_DEBUG || lvl > LOG_FATAL {
+	if lvl < LogDebug || lvl > LogFatal {
 		return nil, errors.New("bad log level")
 	}
 
@@ -61,34 +66,40 @@ func NewLogger(conf *LogConfig) (*Logger, error) {
 	}, nil
 }
 
+// Log emits a log message.
 func (l *Logger) Log(lvl int, fmt string, v ...interface{}) {
-	if lvl < LOG_DEBUG || lvl > LOG_FATAL || lvl < l.level {
+	if lvl < LogDebug || lvl > LogFatal || lvl < l.level {
 		return
 	}
 
 	l.logger.Printf(logLevelStrs[lvl]+" "+fmt, v...)
 
-	if lvl == LOG_FATAL {
+	if lvl == LogFatal {
 		os.Exit(1)
 	}
 }
 
+// Debug emits a debugging message.
 func (l *Logger) Debug(fmt string, v ...interface{}) {
-	l.Log(LOG_DEBUG, fmt, v...)
+	l.Log(LogDebug, fmt, v...)
 }
 
+// Info emits an information message.
 func (l *Logger) Info(fmt string, v ...interface{}) {
-	l.Log(LOG_INFO, fmt, v...)
+	l.Log(LogInfo, fmt, v...)
 }
 
+// Warn emits an warning message.
 func (l *Logger) Warn(fmt string, v ...interface{}) {
-	l.Log(LOG_WARNING, fmt, v...)
+	l.Log(LogWarning, fmt, v...)
 }
 
+// Error emits an error message.
 func (l *Logger) Error(fmt string, v ...interface{}) {
-	l.Log(LOG_ERROR, fmt, v...)
+	l.Log(LogError, fmt, v...)
 }
 
+// Fatal emits a fatal message and exits with failure.
 func (l *Logger) Fatal(fmt string, v ...interface{}) {
-	l.Log(LOG_FATAL, fmt, v...)
+	l.Log(LogFatal, fmt, v...)
 }

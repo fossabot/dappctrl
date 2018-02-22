@@ -2,15 +2,40 @@ package data
 
 import (
 	"database/sql"
+	// Load Go Postgres driver.
 	_ "github.com/lib/pq"
+	"github.com/privatix/dappctrl/util"
 	"gopkg.in/reform.v1"
 	"gopkg.in/reform.v1/dialects/postgresql"
-	"pxctrl/util"
+	"strings"
 )
 
-type DB reform.DB
+// DBConfig is a DB configuration.
+type DBConfig struct {
+	Conn map[string]string
+}
 
-func NewDB(conf *Config, logger *util.Logger) (*DB, error) {
+// ConnStr composes a data connection string.
+func (c DBConfig) ConnStr() string {
+	comps := []string{}
+	for k, v := range c.Conn {
+		comps = append(comps, k+"="+v)
+	}
+	return strings.Join(comps, " ")
+}
+
+// NewDBConfig creates a default DB configuration.
+func NewDBConfig() *DBConfig {
+	return &DBConfig{
+		Conn: map[string]string{
+			"dbname":  "dappctrl",
+			"sslmode": "disable",
+		},
+	}
+}
+
+// NewDB creates a new data connection handle.
+func NewDB(conf *DBConfig, logger *util.Logger) (*reform.DB, error) {
 	conn, err := sql.Open("postgres", conf.ConnStr())
 	if err == nil {
 		err = conn.Ping()
@@ -19,14 +44,6 @@ func NewDB(conf *Config, logger *util.Logger) (*DB, error) {
 		return nil, err
 	}
 
-	return (*DB)(reform.NewDB(conn,
-		postgresql.Dialect, reform.NewPrintfLogger(logger.Debug))), nil
-}
-
-func (db *DB) Begin() (*reform.TX, error) {
-	return (*reform.DB)(db).Begin()
-}
-
-func (db *DB) Close() {
-	(*reform.DB)(db).DBInterface().(*sql.DB).Close()
+	return reform.NewDB(conn,
+		postgresql.Dialect, reform.NewPrintfLogger(logger.Debug)), nil
 }

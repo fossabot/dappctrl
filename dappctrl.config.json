@@ -1,0 +1,19 @@
+{
+    "DB": {
+        "Conn": {
+            "dbname": "dappctrl",
+            "sslmode": "disable"
+        }
+    },
+
+    "Log": {
+        "Level": "info"
+    },
+
+    "VPNServer": {
+        "Addr": "0.0.0.0:8080",
+        "CertFile": "dappctrl.cert",
+        "KeyFile": "dappctrl.key",
+        "TLS": false
+    }
+}
