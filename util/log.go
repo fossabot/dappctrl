@@ -61,7 +61,7 @@ func NewLogger(conf *LogConfig) (*Logger, error) {
 	}
 
 	return &Logger{
-		log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile),
+		log.New(os.Stderr, "", log.LstdFlags),
 		lvl,
 	}, nil
 }

@@ -3,13 +3,14 @@ package vpn
 import (
 	"github.com/AlekSi/pointer"
 	"github.com/privatix/dappctrl/data"
+	vpnutil "github.com/privatix/dappctrl/vpn/util"
 	"net/http"
 	"time"
 )
 
 // StopRequest is a request to stop a client session.
 type StopRequest struct {
-	Session    string `json:"session"`
+	Channel    string `json:"channel"`
 	Uploaded   uint64 `json:"uploaded"`
 	Downloaded uint64 `json:"downloaded"`
 }
@@ -25,19 +26,28 @@ func (s *Server) handleStop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.logger.Info("session: %s", req.Session)
+	s.logger.Info("channel: %s", req.Channel)
 
-	sess := data.Session{ID: req.Session}
-	if !s.findByPrimaryKey(w, &sess) {
+	sid, err := vpnutil.FindCurrentSession(s.db, req.Channel)
+	if err != nil {
+		s.logger.Error("failed to find session: %s", err)
+		s.replyInternalError(w)
+		return
+	}
+
+	s.logger.Info("session: %s", sid)
+
+	sess := data.Session{ID: sid}
+	if !s.findByPrimaryKey(w, &sess, true) {
 		return
 	}
 
 	sess.Stopped = pointer.ToTime(time.Now())
 
-	s.logger.Info("session duration: %s", sess.Stopped.Sub(*sess.Started))
+	s.logger.Info("session duration: %s", sess.Stopped.Sub(sess.Started))
 
-	vsess := data.VPNSession{ID: req.Session}
-	if !s.findByPrimaryKey(w, &sess) {
+	vsess := data.VPNSession{ID: sid}
+	if !s.findByPrimaryKey(w, &vsess, true) {
 		return
 	}
 

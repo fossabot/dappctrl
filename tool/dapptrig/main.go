@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/privatix/dappctrl/util"
-	"github.com/privatix/dappctrl/vpn"
+	vpnserv "github.com/privatix/dappctrl/vpn/serv"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,22 +19,22 @@ type config struct {
 	LogFile    string
 	ServerAddr string
 	ServerTLS  bool
-	SessionDir string
+	ChannelDir string
 }
 
 func newConfig() *config {
-	conf := vpn.NewServerConfig()
+	conf := vpnserv.NewConfig()
 	return &config{
 		LogFile:    "dapptrig.log",
 		ServerAddr: conf.Addr,
 		ServerTLS:  conf.TLS,
-		SessionDir: "sessions",
+		ChannelDir: "channels",
 	}
 }
 
 const (
 	logPerm  = 0644
-	sessPerm = 0644
+	chanPerm = 0644
 )
 
 func main() {
@@ -129,19 +129,19 @@ func commonName() string {
 	return base64.URLEncoding.EncodeToString([]byte(cn))
 }
 
-func storeSession(conf *config, session string) {
-	name := filepath.Join(conf.SessionDir, commonName())
-	err := ioutil.WriteFile(name, []byte(session), sessPerm)
+func storeChannel(conf *config, ch string) {
+	name := filepath.Join(conf.ChannelDir, commonName())
+	err := ioutil.WriteFile(name, []byte(ch), chanPerm)
 	if err != nil {
-		log.Fatalf("failed to store session: %s", err)
+		log.Fatalf("failed to store channel: %s", err)
 	}
 }
 
-func loadSession(conf *config) string {
-	name := filepath.Join(conf.SessionDir, commonName())
+func loadChannel(conf *config) string {
+	name := filepath.Join(conf.ChannelDir, commonName())
 	data, err := ioutil.ReadFile(name)
 	if err != nil {
-		log.Fatalf("failed to load session: %s", err)
+		log.Fatalf("failed to load channel: %s", err)
 	}
 	return string(data)
 }
@@ -149,15 +149,15 @@ func loadSession(conf *config) string {
 func handleAuth(conf *config) {
 	user, pass := getCreds()
 
-	req := vpn.AuthRequest{Channel: user, Password: pass}
+	req := vpnserv.AuthRequest{Channel: user, Password: pass}
 
-	var rep vpn.AuthReply
-	post(conf, vpn.PathAuth, req, &rep)
+	var rep vpnserv.AuthReply
+	post(conf, vpnserv.PathAuth, req, &rep)
 	if len(rep.Error) != 0 {
 		log.Fatalf("failed to authenticate %s: %s", user, rep.Error)
 	}
 
-	storeSession(conf, rep.Session)
+	storeChannel(conf, user)
 }
 
 func handleConnect(conf *config) {
@@ -166,15 +166,15 @@ func handleConnect(conf *config) {
 		log.Fatalf("bad trusted_port value")
 	}
 
-	req := vpn.StartRequest{
-		Session:    loadSession(conf),
+	req := vpnserv.StartRequest{
+		Channel:    loadChannel(conf),
 		ServerIP:   os.Getenv("ifconfig_remote"),
 		ClientIP:   os.Getenv("trusted_ip"),
 		ClientPort: uint16(port),
 	}
 
-	var rep vpn.StartReply
-	post(conf, vpn.PathStart, req, &rep)
+	var rep vpnserv.StartReply
+	post(conf, vpnserv.PathStart, req, &rep)
 	if len(rep.Error) != 0 {
 		log.Fatalf("failed to start session: %s", rep.Error)
 	}
@@ -191,14 +191,14 @@ func handleDisconnect(conf *config) {
 		log.Fatalf("bad bytes_received value")
 	}
 
-	req := vpn.StopRequest{
-		Session:    loadSession(conf),
+	req := vpnserv.StopRequest{
+		Channel:    loadChannel(conf),
 		Uploaded:   uint64(up),
 		Downloaded: uint64(down),
 	}
 
-	var rep vpn.StopReply
-	post(conf, vpn.PathStop, req, &rep)
+	var rep vpnserv.StopReply
+	post(conf, vpnserv.PathStop, req, &rep)
 	if len(rep.Error) != 0 {
 		log.Fatalf("failed to stop session: %s", rep.Error)
 	}

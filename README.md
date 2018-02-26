@@ -31,7 +31,7 @@ to `$PATH`.
 5. Modify `dappctrl.config.json` if you need non-default configuration and run:
 
     ```bash
-    $HOME/go/bin/dappctrl -config=$DAPPCTRL_DIR/dappctrl.config.json
+    dappctrl -config=$DAPPCTRL_DIR/dappctrl.config.json
     ```
 
 6. Build OpenVPN session trigger:
