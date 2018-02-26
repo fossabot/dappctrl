@@ -5,7 +5,7 @@ import (
 	"flag"
 	"github.com/privatix/dappctrl/data"
 	"github.com/privatix/dappctrl/util"
-	"github.com/privatix/dappctrl/vpn"
+	vpnserv "github.com/privatix/dappctrl/vpn/serv"
 	"log"
 )
 
@@ -14,14 +14,14 @@ import (
 type config struct {
 	DB        *data.DBConfig
 	Log       *util.LogConfig
-	VPNServer *vpn.ServerConfig
+	VPNServer *vpnserv.Config
 }
 
 func newConfig() *config {
 	return &config{
 		DB:        data.NewDBConfig(),
 		Log:       util.NewLogConfig(),
-		VPNServer: vpn.NewServerConfig(),
+		VPNServer: vpnserv.NewConfig(),
 	}
 }
 
@@ -46,7 +46,7 @@ func main() {
 	}
 	defer db.DBInterface().(*sql.DB).Close()
 
-	server := vpn.NewServer(conf.VPNServer, logger, db)
+	server := vpnserv.NewServer(conf.VPNServer, logger, db)
 
 	if err := server.ListenAndServe(); err != nil {
 		logger.Fatal("failed to start VPN session server: %s\n", err)

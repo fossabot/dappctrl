@@ -74,16 +74,16 @@ CREATE TABLE channels (
 CREATE TABLE sessions (
     id uuid PRIMARY KEY,
     channel uuid NOT NULL REFERENCES channels(id),
-    started timestamp with time zone,
+    started timestamp with time zone NOT NULL,
     stopped timestamp with time zone
 );
 
 -- Client sessions for VPN service.
 CREATE TABLE sessions_vpn (
     id uuid PRIMARY KEY REFERENCES sessions(id),
-    server_ip inet,
-    client_ip inet,
-    client_port int,
+    server_ip inet NOT NULL,
+    client_ip inet NOT NULL,
+    client_port int NOT NULL,
     uploaded bigint NOT NULL,
     downloaded bigint NOT NULL
 );

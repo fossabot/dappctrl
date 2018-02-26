@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/privatix/dappctrl/data"
-	"github.com/privatix/dappctrl/util"
 	"golang.org/x/crypto/sha3"
 	"net/http"
 )
@@ -18,7 +17,6 @@ type AuthRequest struct {
 // AuthReply is an authentication reply.
 type AuthReply struct {
 	errorReply
-	Session string `json:"session"`
 }
 
 func checkPassword(ch *data.Channel, pwd string) bool {
@@ -35,7 +33,7 @@ func (s *Server) handleAuth(w http.ResponseWriter, r *http.Request) {
 	s.logger.Info("channel: %s", req.Channel)
 
 	ch := data.Channel{ID: req.Channel}
-	if !s.findByPrimaryKey(w, &ch) {
+	if !s.findByPrimaryKey(w, &ch, false) {
 		return
 	}
 
@@ -46,31 +44,5 @@ func (s *Server) handleAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tx, ok := s.begin(w)
-	if !ok {
-		return
-	}
-
-	sess := data.Session{
-		ID:      util.NewUUID(),
-		Channel: req.Channel,
-	}
-
-	if !s.insert(w, tx, &sess) {
-		return
-	}
-
-	vsess := data.VPNSession{
-		ID: sess.ID,
-	}
-
-	if !s.insert(w, tx, &vsess) {
-		return
-	}
-
-	if !s.commit(w, tx) {
-		return
-	}
-
-	s.reply(w, AuthReply{Session: sess.ID})
+	s.reply(w, AuthReply{})
 }

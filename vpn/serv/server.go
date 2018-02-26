@@ -6,17 +6,17 @@ import (
 	"net/http"
 )
 
-// ServerConfig is a configuration for VPN session server.
-type ServerConfig struct {
+// Config is a configuration for VPN session server.
+type Config struct {
 	Addr     string
 	CertFile string
 	KeyFile  string
 	TLS      bool
 }
 
-// NewServerConfig creates a default configuration for VPN session server.
-func NewServerConfig() *ServerConfig {
-	return &ServerConfig{
+// NewConfig creates a default configuration for VPN session server.
+func NewConfig() *Config {
+	return &Config{
 		Addr:     "localhost:8080",
 		CertFile: "dappctrl.cert",
 		KeyFile:  "dappctrl.key",
@@ -26,13 +26,13 @@ func NewServerConfig() *ServerConfig {
 
 // Server is a VPN session server.
 type Server struct {
-	conf   *ServerConfig
+	conf   *Config
 	logger *util.Logger
 	db     *reform.DB
 }
 
 // NewServer creates a new VPN session server.
-func NewServer(conf *ServerConfig, logger *util.Logger, db *reform.DB) *Server {
+func NewServer(conf *Config, logger *util.Logger, db *reform.DB) *Server {
 	return &Server{conf, logger, db}
 }
 

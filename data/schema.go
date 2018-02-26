@@ -86,17 +86,17 @@ type Channel struct {
 type Session struct {
 	ID      string     `reform:"id,pk"`
 	Channel string     `reform:"channel"`
-	Started *time.Time `reform:"started"`
+	Started time.Time  `reform:"started"`
 	Stopped *time.Time `reform:"stopped"`
 }
 
 // VPNSession is a client session for VPN service.
 //reform:sessions_vpn
 type VPNSession struct {
-	ID         string  `reform:"id,pk"`
-	ServerIP   *string `reform:"server_ip"`
-	ClientIP   *string `reform:"client_ip"`
-	ClientPort *uint16 `reform:"client_port"`
-	Uploaded   uint64  `reform:"uploaded"`
-	Downloaded uint64  `reform:"downloaded"`
+	ID         string `reform:"id,pk"`
+	ServerIP   string `reform:"server_ip"`
+	ClientIP   string `reform:"client_ip"`
+	ClientPort uint16 `reform:"client_port"`
+	Uploaded   uint64 `reform:"uploaded"`
+	Downloaded uint64 `reform:"downloaded"`
 }
