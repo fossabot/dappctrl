@@ -1,4 +1,4 @@
-package eth
+package deprecated
 
 type Config struct {
 	Addr    Address

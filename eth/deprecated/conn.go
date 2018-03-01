@@ -1,4 +1,4 @@
-package eth
+package deprecated
 
 type Address [20]byte
 type Bytes32 [32]byte

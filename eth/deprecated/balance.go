@@ -1,4 +1,4 @@
-package eth
+package deprecated
 
 func (c *Conn) AddBalance(val Uint192) error {
 	return nil

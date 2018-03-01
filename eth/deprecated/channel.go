@@ -1,4 +1,5 @@
-package eth
+package deprecated
+
 
 type CreatedChannel struct {
 	Deposit Uint192
@@ -10,6 +11,7 @@ func (c *Conn) QueryCreatedChannels(
 	return nil, nil
 }
 
+
 type ToppedUpChannel struct {
 	Offering     Bytes32
 	AddedDeposit Uint192
@@ -19,6 +21,7 @@ func (c *Conn) QueryToppedUpChannels(
 	client, agent Address, openBlock uint32) ([]ToppedUpChannel, error) {
 	return nil, nil
 }
+
 
 type CloseRequestedChannel struct {
 	Offering Bytes32

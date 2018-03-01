@@ -1,4 +1,4 @@
-package eth
+package deprecated
 
 type CreatedOffering struct {
 	MinDeposit    Uint256
@@ -31,6 +31,7 @@ func (c *Conn) SettleOffering(
 	agent Address, openBlock uint32, offering Bytes32) error {
 	return nil
 }
+
 
 type ChannelInfo struct{}
 
