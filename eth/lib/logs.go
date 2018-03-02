@@ -24,14 +24,13 @@ type LogsAPIRecord struct {
 
 type LogsAPIResponse struct {
 	apiResponse
-	Result  []LogsAPIRecord `json:"result"`
+	Result []LogsAPIRecord `json:"result"`
 }
-
 
 // Fetches logs form remote geth node.
 //
 // Tests: logs_test/TestNormalLogsFetching
-func (e *EthereumClient) GetLogs(contractAddress string, topics []string) (*LogsAPIResponse, error){
+func (e *EthereumClient) GetLogs(contractAddress string, topics []string) (*LogsAPIResponse, error) {
 	if contractAddress == "" {
 		return nil, errors.New("contract address is required")
 	}
@@ -54,7 +53,6 @@ func (e *EthereumClient) GetLogs(contractAddress string, topics []string) (*Logs
 	if err != nil {
 		return nil, errors.New("can't marshall topics: " + err.Error())
 	}
-
 
 	params := fmt.Sprintf(`{"topics":%s,"address":"%s"}`, topicsJson, contractAddress)
 

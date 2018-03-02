@@ -4,7 +4,6 @@ import (
 	"testing"
 )
 
-
 const (
 	// Contract events digests.
 	// Copied here to avoid cyclic reference with contract.
@@ -86,7 +85,6 @@ func TestNegativeLogsFetching(t *testing.T) {
 			t.Fatal("Error must be returned")
 		}
 	}
-
 
 	{
 		// Test purpose:
