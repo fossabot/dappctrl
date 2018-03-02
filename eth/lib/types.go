@@ -1,9 +1,9 @@
-package eth
+package lib
 
 import (
-	"fmt"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"math/big"
 )
 
@@ -46,7 +46,7 @@ func (a *Address) String() string {
 // Tests: types_test.go/TestAddressCreating
 // (String() uses a.bytes for hex representation,
 // in case if it is malformed - String() tests would fail)
-func (a* Address) Bytes() [addressBytesLength]byte {
+func (a *Address) Bytes() [addressBytesLength]byte {
 	return a.bytes
 }
 
@@ -67,7 +67,7 @@ func NewUint256(hexRepresentation string) (*Uint256, error) {
 
 	// Hex representation might be shorter, than 64 symbols,
 	// but must not be longer than 64 symbols.
-	if len(hexSource) == 0 || len(hexSource) > 256 / 8 * 2 {
+	if len(hexSource) == 0 || len(hexSource) > 256/8*2 {
 		return nil, errors.New("uint256 might be decoded from 64 symbols long hex string literals")
 	}
 
@@ -112,7 +112,7 @@ func NewUint192(hexRepresentation string) (*Uint192, error) {
 
 	// Hex representation might be shorter, than 48 symbols,
 	// but must not be longer than 42 symbols.
-	if len(hexSource) == 0 || len(hexSource) > 192 / 8 * 2 {
+	if len(hexSource) == 0 || len(hexSource) > 192/8*2 {
 		return nil, errors.New("uint192 might be decoded from 2..48 symbols long hex string literals")
 	}
 
@@ -134,7 +134,7 @@ func NewUint192(hexRepresentation string) (*Uint192, error) {
 }
 
 func (i *Uint192) String() string {
-	return  fmt.Sprintf("%#x", i.number)
+	return fmt.Sprintf("%#x", i.number)
 }
 
 func (i *Uint192) ToBigInt() *big.Int {

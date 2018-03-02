@@ -1,4 +1,4 @@
-package eth
+package lib
 
 import "testing"
 
