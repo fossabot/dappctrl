@@ -1,4 +1,4 @@
-package vpn
+package srv
 
 import (
 	"github.com/privatix/dappctrl/data"

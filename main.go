@@ -1,21 +1,20 @@
 package main
 
+//go:generate go generate github.com/privatix/dappctrl/data
+
 import (
-	"database/sql"
 	"flag"
 	"github.com/privatix/dappctrl/data"
 	"github.com/privatix/dappctrl/util"
 	vpnmon "github.com/privatix/dappctrl/vpn/mon"
-	vpnserv "github.com/privatix/dappctrl/vpn/serv"
+	vpnsrv "github.com/privatix/dappctrl/vpn/srv"
 	"log"
 )
-
-//go:generate go generate github.com/privatix/dappctrl/data
 
 type config struct {
 	DB         *data.DBConfig
 	Log        *util.LogConfig
-	VPNServer  *vpnserv.Config
+	VPNServer  *vpnsrv.Config
 	VPNMonitor *vpnmon.Config
 }
 
@@ -23,7 +22,7 @@ func newConfig() *config {
 	return &config{
 		DB:         data.NewDBConfig(),
 		Log:        util.NewLogConfig(),
-		VPNServer:  vpnserv.NewConfig(),
+		VPNServer:  vpnsrv.NewConfig(),
 		VPNMonitor: vpnmon.NewConfig(),
 	}
 }
@@ -45,20 +44,21 @@ func main() {
 
 	db, err := data.NewDB(conf.DB, logger)
 	if err != nil {
-		logger.Fatal("failed to open DB connection: %s\n", err)
+		logger.Fatal("failed to open db connection: %s\n", err)
 	}
-	defer db.DBInterface().(*sql.DB).Close()
+	defer data.CloseDB(db)
 
-	server := vpnserv.NewServer(conf.VPNServer, logger, db)
+	srv := vpnsrv.NewServer(conf.VPNServer, logger, db)
+	defer srv.Close()
 	go func() {
-		logger.Fatal("failed to serve VPN session requests: %s\n",
-			server.ListenAndServe())
+		logger.Fatal("failed to serve vpn session requests: %s\n",
+			srv.ListenAndServe())
 	}()
 
-	monitor := vpnmon.NewMonitor(conf.VPNMonitor, logger, db)
+	mon := vpnmon.NewMonitor(conf.VPNMonitor, logger, db)
 	go func() {
-		logger.Fatal("failed to monitor VPN traffic: %s\n",
-			monitor.MonitorTraffic())
+		logger.Fatal("failed to monitor vpn traffic: %s\n",
+			mon.MonitorTraffic())
 	}()
 
 	<-make(chan bool)
