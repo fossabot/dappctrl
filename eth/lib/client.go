@@ -1,5 +1,16 @@
 package lib
 
+// Implements client for ethereum network.
+//
+// For details about contracts methods calling:
+// https://github.com/ethereum/go-ethereum/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts
+//
+// Note:
+// "abigen" is available in contract/tools, no need for building it itself.
+//
+// For details about events (logs in Ethereum terminology) fetching:
+// https://ethereumbuilders.gitbooks.io/guide/content/en/ethereum_json_rpc.html
+
 import (
 	"encoding/json"
 	"errors"
@@ -16,6 +27,8 @@ type EthereumClient struct {
 
 	client    http.Client
 	requestID uint64
+
+	privateKeyPath string
 }
 
 func NewEthereumClient(host string, port uint16) *EthereumClient {

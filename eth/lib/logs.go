@@ -27,7 +27,7 @@ type LogsAPIResponse struct {
 	Result []LogsAPIRecord `json:"result"`
 }
 
-// Fetches logs form remote geth node.
+// GetLog fetches logs form remote geth node.
 //
 // Tests: logs_test/TestNormalLogsFetching
 func (e *EthereumClient) GetLogs(contractAddress string, topics []string) (*LogsAPIResponse, error) {
