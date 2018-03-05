@@ -10,9 +10,9 @@
         "Level": "info"
     },
 
-    "VPNMonitor": {
-        "Addr": "localhost:7505",
-        "ByteCountPeriod": 5
+    "TestData": {
+        "Channel": "e5b23706-16ed-11e8-b642-0ed5f89f718b",
+        "Password": "secret"
     },
 
     "VPNServer": {

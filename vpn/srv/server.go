@@ -1,4 +1,4 @@
-package vpn
+package srv
 
 import (
 	"github.com/privatix/dappctrl/util"
@@ -29,11 +29,12 @@ type Server struct {
 	conf   *Config
 	logger *util.Logger
 	db     *reform.DB
+	srv    http.Server
 }
 
 // NewServer creates a new VPN session server.
 func NewServer(conf *Config, logger *util.Logger, db *reform.DB) *Server {
-	return &Server{conf, logger, db}
+	return &Server{conf, logger, db, http.Server{Addr: conf.Addr}}
 }
 
 // VPN session API paths.
@@ -45,14 +46,20 @@ const (
 
 // ListenAndServe starts to listen and to serve requests.
 func (s *Server) ListenAndServe() error {
-	http.HandleFunc(PathAuth, s.handleAuth)
-	http.HandleFunc(PathStart, s.handleStart)
-	http.HandleFunc(PathStop, s.handleStop)
+	mux := http.NewServeMux()
+	mux.HandleFunc(PathAuth, s.handleAuth)
+	mux.HandleFunc(PathStart, s.handleStart)
+	mux.HandleFunc(PathStop, s.handleStop)
+	s.srv.Handler = mux
 
 	if s.conf.TLS {
-		return http.ListenAndServeTLS(
-			s.conf.Addr, s.conf.CertFile, s.conf.KeyFile, nil)
+		return s.srv.ListenAndServeTLS(s.conf.CertFile, s.conf.KeyFile)
 	}
 
-	return http.ListenAndServe(s.conf.Addr, nil)
+	return s.srv.ListenAndServe()
+}
+
+// Close immediately closes the server making ListenAndServe() to return.
+func (s *Server) Close() error {
+	return s.srv.Close()
 }

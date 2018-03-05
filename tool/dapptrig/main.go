@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/privatix/dappctrl/util"
-	vpnserv "github.com/privatix/dappctrl/vpn/serv"
+	vpnsrv "github.com/privatix/dappctrl/vpn/srv"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -23,7 +23,7 @@ type config struct {
 }
 
 func newConfig() *config {
-	conf := vpnserv.NewConfig()
+	conf := vpnsrv.NewConfig()
 	return &config{
 		LogFile:    "dapptrig.log",
 		ServerAddr: conf.Addr,
@@ -149,10 +149,10 @@ func loadChannel(conf *config) string {
 func handleAuth(conf *config) {
 	user, pass := getCreds()
 
-	req := vpnserv.AuthRequest{Channel: user, Password: pass}
+	req := vpnsrv.AuthRequest{Channel: user, Password: pass}
 
-	var rep vpnserv.AuthReply
-	post(conf, vpnserv.PathAuth, req, &rep)
+	var rep vpnsrv.AuthReply
+	post(conf, vpnsrv.PathAuth, req, &rep)
 	if len(rep.Error) != 0 {
 		log.Fatalf("failed to authenticate %s: %s", user, rep.Error)
 	}
@@ -166,15 +166,15 @@ func handleConnect(conf *config) {
 		log.Fatalf("bad trusted_port value")
 	}
 
-	req := vpnserv.StartRequest{
+	req := vpnsrv.StartRequest{
 		Channel:    loadChannel(conf),
 		ServerIP:   os.Getenv("ifconfig_remote"),
 		ClientIP:   os.Getenv("trusted_ip"),
 		ClientPort: uint16(port),
 	}
 
-	var rep vpnserv.StartReply
-	post(conf, vpnserv.PathStart, req, &rep)
+	var rep vpnsrv.StartReply
+	post(conf, vpnsrv.PathStart, req, &rep)
 	if len(rep.Error) != 0 {
 		log.Fatalf("failed to start session: %s", rep.Error)
 	}
@@ -191,14 +191,14 @@ func handleDisconnect(conf *config) {
 		log.Fatalf("bad bytes_received value")
 	}
 
-	req := vpnserv.StopRequest{
+	req := vpnsrv.StopRequest{
 		Channel:    loadChannel(conf),
 		Uploaded:   uint64(up),
 		Downloaded: uint64(down),
 	}
 
-	var rep vpnserv.StopReply
-	post(conf, vpnserv.PathStop, req, &rep)
+	var rep vpnsrv.StopReply
+	post(conf, vpnsrv.PathStop, req, &rep)
 	if len(rep.Error) != 0 {
 		log.Fatalf("failed to stop session: %s", rep.Error)
 	}

@@ -1,4 +1,4 @@
-package vpn
+package srv
 
 import (
 	"github.com/AlekSi/pointer"
@@ -30,8 +30,8 @@ func (s *Server) handleStop(w http.ResponseWriter, r *http.Request) {
 
 	sid, err := vpnutil.FindCurrentSession(s.db, req.Channel)
 	if err != nil {
-		s.logger.Error("failed to find session: %s", err)
-		s.replyInternalError(w)
+		s.logger.Warn("failed to find session: %s", err)
+		s.reply(w, errorReply{ErrObjectNotFound})
 		return
 	}
 

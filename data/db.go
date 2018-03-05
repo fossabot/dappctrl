@@ -47,3 +47,8 @@ func NewDB(conf *DBConfig, logger *util.Logger) (*reform.DB, error) {
 	return reform.NewDB(conn,
 		postgresql.Dialect, reform.NewPrintfLogger(logger.Debug)), nil
 }
+
+// CloseDB closes database connection.
+func CloseDB(db *reform.DB) {
+	db.DBInterface().(*sql.DB).Close()
+}
