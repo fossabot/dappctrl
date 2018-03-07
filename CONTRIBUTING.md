@@ -47,6 +47,8 @@ For better understanding, take a look at [git-flow cheatsheet](https://danielkum
 We adhere Google code style guides:
 * Golang:https://github.com/golang/go/wiki/CodeReviewComments
 
+SQL style guide: http://www.sqlstyle.guide/
+
 ## Commit message
 > Describe your changes in imperative mood, e.g. "make xyzzy do frotz" instead of "[This patch] makes xyzzy do frotz" or "[I] changed xyzzy to do frotz", as if you are giving orders to the codebase to change its behavior.
 
