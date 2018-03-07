@@ -69,6 +69,10 @@ installation was succeeded (if it possible)
 
 ## Running the tests
 
+```bash
+go test $DAPPCTRL/... -config=$DAPPCTRL_DIR/dappctrl-test.config.json
+```
+
 # Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
