@@ -62,7 +62,9 @@ installation was succeeded (if it possible)
 ```
 
 # Tests
+
 @dappctrl_team please add instruction how to prepare environment and run tests
+
 ## Preparing environment
 
 ## Running the tests
