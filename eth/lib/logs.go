@@ -29,17 +29,31 @@ type LogsAPIResponse struct {
 
 // GetLog fetches logs form remote geth node.
 //
+// "topics" contains topics, that must be used for filtering.
+// "fromBlock" - specifies first block number **from** which lookup must be performed.
+// "toBlock" - specifies last block number **to** which lookup must be performed.
+//
 // Tests: logs_test/TestNormalLogsFetching
-func (e *EthereumClient) GetLogs(contractAddress string, topics []string) (*LogsAPIResponse, error) {
+// Tests: logs_test/TestNegativeLogsFetching
+// Tests: logs_test/TestLogsFetchingWithBrokenNetwork
+func (e *EthereumClient) GetLogs(contractAddress string, topics []string, fromBlock, toBlock string) (*LogsAPIResponse, error) {
 	if contractAddress == "" {
 		return nil, errors.New("contract address is required")
+	}
+
+	if fromBlock == "" {
+		fromBlock = "earliest"
+	}
+
+	if toBlock == "" {
+		toBlock = "latest"
 	}
 
 	// note: topics are not checked for emptiness,
 	// because empty topics are allowed by the geth-API:
 	// in this case all events of the contract would be returned.
 	for _, topic := range topics {
-		const kTopicLength = 34
+		const kTopicLength = 2 + 64  // "0x" + 64 symbols (256 bits in hex)
 		if len(topic) != kTopicLength {
 			return nil, errors.New("invalid topic occurred: " + topic)
 		}
@@ -54,7 +68,8 @@ func (e *EthereumClient) GetLogs(contractAddress string, topics []string) (*Logs
 		return nil, errors.New("can't marshall topics: " + err.Error())
 	}
 
-	params := fmt.Sprintf(`{"topics":%s,"address":"%s"}`, topicsJson, contractAddress)
+	params := fmt.Sprintf(`{"topics":%s,"address":"%s","fromBlock":"%s","toBlock":"%s"}`,
+		topicsJson, contractAddress, fromBlock, toBlock)
 
 	response := &LogsAPIResponse{}
 	err = e.fetch("eth_getLogs", params, response)
