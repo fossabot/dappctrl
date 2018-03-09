@@ -1,3 +1,6 @@
+[![Maintainability](https://api.codeclimate.com/v1/badges/7e76f071e5408b13ea53/maintainability)](https://codeclimate.com/github/Privatix/dappctrl/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/7e76f071e5408b13ea53/test_coverage)](https://codeclimate.com/github/Privatix/dappctrl/test_coverage)
+
 # Privatix Controller.
 Privatix Controller is a core of Agent and Client functionality.
 
