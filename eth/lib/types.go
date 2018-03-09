@@ -59,16 +59,20 @@ type Uint256 struct {
 func NewUint256(hexRepresentation string) (*Uint256, error) {
 	hexSource := hexRepresentation
 
-	// In case if value is prefixed with 0x -
-	// it should be removed for proper decoding.
-	if hexSource[:2] == "0x" {
-		hexSource = hexSource[2:]
-	}
-
 	// Hex representation might be shorter, than 64 symbols,
 	// but must not be longer than 64 symbols.
-	if len(hexSource) == 0 || len(hexSource) > 256/8*2 {
-		return nil, errors.New("uint256 might be decoded from 64 symbols long hex string literals")
+	if len(hexSource) == 0 || len(hexSource) > 2 + (256/8*2) {
+		return nil, errors.New("uint256 might be decoded from strings like 0x{64 symbols}")
+	}
+
+	if len(hexSource) == 2 + (256/8*2) && hexSource[:2] != "0x" {
+		return nil, errors.New("uint256 might be decoded from strings like 0x{64 symbols}")
+	}
+
+	// In case if value is prefixed with 0x -
+	// it should be removed for proper decoding.
+	if len(hexSource) >= 2 && hexSource[:2] == "0x" {
+		hexSource = hexSource[2:]
 	}
 
 	// In some cases, hex representation might omit leading zeroes,
@@ -104,16 +108,20 @@ type Uint192 struct {
 func NewUint192(hexRepresentation string) (*Uint192, error) {
 	hexSource := hexRepresentation
 
-	// In case if value is prefixed with 0x -
-	// it should be removed for proper decoding.
-	if hexSource[:2] == "0x" {
-		hexSource = hexSource[2:]
-	}
-
 	// Hex representation might be shorter, than 48 symbols,
 	// but must not be longer than 42 symbols.
-	if len(hexSource) == 0 || len(hexSource) > 192/8*2 {
-		return nil, errors.New("uint192 might be decoded from 2..48 symbols long hex string literals")
+	if len(hexSource) == 0 || len(hexSource) > 2 + (192/8*2) {
+		return nil, errors.New("uint256 might be decoded from strings like 0x{48 symbols}")
+	}
+
+	if len(hexSource) == 2 + (192/8*2) && hexSource[:2] != "0x" {
+		return nil, errors.New("uint256 might be decoded from strings like 0x{48 symbols}")
+	}
+
+	// In case if value is prefixed with 0x -
+	// it should be removed for proper decoding.
+	if len(hexSource) >= 2 && hexSource[:2] == "0x" {
+		hexSource = hexSource[2:]
 	}
 
 	// In some cases, hex representation might omit leading zeroes,
