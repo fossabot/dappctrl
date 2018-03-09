@@ -50,6 +50,7 @@ CREATE TABLE offerings_vpn(
 -- State channel states.
 CREATE TYPE channel_state AS ENUM (
     'open',
+    'closing',
     'closed_coop',
     'closed_uncoop'
 );

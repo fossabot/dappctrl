@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/privatix/dappctrl/data"
 	"gopkg.in/reform.v1"
 )
 
@@ -19,8 +20,16 @@ func FindCurrentSession(db *reform.DB, ch string) (string, error) {
 	return sess, nil
 }
 
-// HasPositiveBalance checks for a given state channel a balance between
-// consumed VPN traffic and received payments.
-func HasPositiveBalance(db *reform.DB, ch string) (bool, error) {
-	return true, nil
+// ChannelOpen checks whether a given state channel is open. For VPN service
+// that means it allows to connect and to consume traffic.
+func ChannelOpen(db *reform.DB, ch string) (bool, error) {
+	var open bool
+	if err := db.QueryRow(`
+		SELECT state = $1
+		  FROM channels
+		 WHERE id = $2`, data.ChannelOpen, ch).Scan(&open); err != nil {
+		return false, err
+	}
+
+	return open, nil
 }

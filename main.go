@@ -56,6 +56,7 @@ func main() {
 	}()
 
 	mon := vpnmon.NewMonitor(conf.VPNMonitor, logger, db)
+	defer mon.Close()
 	go func() {
 		logger.Fatal("failed to monitor vpn traffic: %s\n",
 			mon.MonitorTraffic())

@@ -60,6 +60,7 @@ type VPNOffering struct {
 // Channel states.
 const (
 	ChannelOpen         = "open"
+	ChannelClosing      = "closing"
 	ChannelClosedCoop   = "closed_coop"
 	ChannelClosedUncoop = "closed_uncoop"
 )

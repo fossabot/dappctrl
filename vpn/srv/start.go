@@ -47,16 +47,16 @@ func (s *Server) handleStart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	positive, err := vpnutil.HasPositiveBalance(s.db, req.Channel)
+	open, err := vpnutil.ChannelOpen(s.db, req.Channel)
 	if err != nil {
-		s.logger.Error("failed to check for positive balance: %s", err)
+		s.logger.Error("failed to check channel state: %s", err)
 		s.replyInternalError(w)
 		return
 	}
 
-	if !positive {
-		s.logger.Warn("no positive balance for channel %s", req.Channel)
-		s.reply(w, errorReply{ErrNoPositiveBalance})
+	if !open {
+		s.logger.Warn("non-open channel %s", req.Channel)
+		s.reply(w, errorReply{ErrNonOpenChannel})
 		return
 	}
 
