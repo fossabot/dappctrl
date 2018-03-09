@@ -1,6 +1,6 @@
-package data
+// +build !notest
 
-// +build test
+package data
 
 import (
 	"github.com/privatix/dappctrl/util"
