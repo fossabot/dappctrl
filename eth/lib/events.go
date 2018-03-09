@@ -2,6 +2,7 @@ package lib
 
 import (
 	"errors"
+	"fmt"
 )
 
 const (
@@ -257,16 +258,16 @@ func (e *EventChannelCloseRequested) Digest() string {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-type EventServiceOfferingCreated struct {
+type EventOfferingCreated struct {
 	Agent         *Address // indexed
 	OfferingHash  *Uint256 // indexed
 	MinDeposit    *Uint192
 	CurrentSupply *Uint192
 }
 
-func NewEventServiceOfferingCreated(topics [3]string, hexData string) (*EventServiceOfferingCreated, error) {
+func NewEventServiceOfferingCreated(topics [3]string, hexData string) (*EventOfferingCreated, error) {
 	var err error
-	event := &EventServiceOfferingCreated{}
+	event := &EventOfferingCreated{}
 
 	err = validateTopics(topics[:])
 	if err != nil {
@@ -329,19 +330,19 @@ func NewEventServiceOfferingCreated(topics [3]string, hexData string) (*EventSer
 	return event, nil
 }
 
-func (e *EventServiceOfferingCreated) Digest() string {
+func (e *EventOfferingCreated) Digest() string {
 	return EthOfferingCreated
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
-type EventServiceOfferingDeleted struct {
+type EventOfferingDeleted struct {
 	OfferingHash *Uint256 // indexed
 }
 
-func NewEventServiceOfferingDeleted(topics [2]string) (*EventServiceOfferingDeleted, error) {
+func NewEventServiceOfferingDeleted(topics [2]string) (*EventOfferingDeleted, error) {
 	var err error
-	event := &EventServiceOfferingDeleted{}
+	event := &EventOfferingDeleted{}
 
 	err = validateTopics(topics[:])
 	if err != nil {
@@ -368,22 +369,22 @@ func NewEventServiceOfferingDeleted(topics [2]string) (*EventServiceOfferingDele
 	return event, nil
 }
 
-func (e *EventServiceOfferingDeleted) Digest() string {
+func (e *EventOfferingDeleted) Digest() string {
 	return EthOfferingDeleted
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
-type EventServiceOfferingEndpoint struct {
+type EventOfferingEndpoint struct {
 	Client          *Address // indexed
 	OfferingHash    *Uint256 // indexed
 	OpenBlockNumber *Uint256 // indexed
 	EndpointHash    *Uint256
 }
 
-func NewEventServiceOfferingEndpoint(topics [4]string, hexData string) (*EventServiceOfferingEndpoint, error) {
+func NewEventServiceOfferingEndpoint(topics [4]string, hexData string) (*EventOfferingEndpoint, error) {
 	var err error
-	event := &EventServiceOfferingEndpoint{}
+	event := &EventOfferingEndpoint{}
 
 	err = validateTopics(topics[:])
 	if err != nil {
@@ -438,20 +439,20 @@ func NewEventServiceOfferingEndpoint(topics [4]string, hexData string) (*EventSe
 	return event, nil
 }
 
-func (e *EventServiceOfferingEndpoint) Digest() string {
+func (e *EventOfferingEndpoint) Digest() string {
 	return EthServiceOfferingEndpoint
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
-type EventServiceOfferingSupplyChanged struct {
+type EventOfferingSupplyChanged struct {
 	OfferingHash  *Uint256 // indexed
 	CurrentSupply *Uint192
 }
 
-func NewEventServiceOfferingSupplyChanged(topics [2]string, hexData string) (*EventServiceOfferingSupplyChanged, error) {
+func NewEventServiceOfferingSupplyChanged(topics [2]string, hexData string) (*EventOfferingSupplyChanged, error) {
 	var err error
-	event := &EventServiceOfferingSupplyChanged{}
+	event := &EventOfferingSupplyChanged{}
 
 	err = validateTopics(topics[:])
 	if err != nil {
@@ -490,19 +491,19 @@ func NewEventServiceOfferingSupplyChanged(topics [2]string, hexData string) (*Ev
 	return event, nil
 }
 
-func (e *EventServiceOfferingSupplyChanged) Digest() string {
+func (e *EventOfferingSupplyChanged) Digest() string {
 	return EthServiceOfferingSupplyChanged
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
-type EventServiceOfferingPoppedUp struct {
+type EventOfferingPoppedUp struct {
 	OfferingHash *Uint256 // indexed
 }
 
-func NewEventServiceOfferingPoppedUp(topics [2]string) (*EventServiceOfferingPoppedUp, error) {
+func NewEventServiceOfferingPoppedUp(topics [2]string) (*EventOfferingPoppedUp, error) {
 	var err error
-	event := &EventServiceOfferingPoppedUp{}
+	event := &EventOfferingPoppedUp{}
 
 	err = validateTopics(topics[:])
 	if err != nil {
@@ -529,7 +530,7 @@ func NewEventServiceOfferingPoppedUp(topics [2]string) (*EventServiceOfferingPop
 	return event, nil
 }
 
-func (e *EventServiceOfferingPoppedUp) Digest() string {
+func (e *EventOfferingPoppedUp) Digest() string {
 	return EthServiceOfferingPoppedUp
 }
 
@@ -708,8 +709,7 @@ func (e *EventUncooperativeChannelClose) Digest() string {
 //---------------------------------------------------------------------------------------------------------------------
 
 func errorUnexpectedEventType(receivedDigest, expectedDigest string) error {
-	return errors.New(
-		"unexpected event type occurred: " + receivedDigest + ", but " + expectedDigest + " is expected")
+	return fmt.Errorf("unexpected event type occurred: %s, but %s is expected", receivedDigest, expectedDigest)
 }
 
 func validateTopics(topics []string) error {
