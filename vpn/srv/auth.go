@@ -3,9 +3,11 @@ package srv
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/privatix/dappctrl/data"
-	"golang.org/x/crypto/sha3"
 	"net/http"
+
+	"golang.org/x/crypto/sha3"
+
+	"github.com/privatix/dappctrl/data"
 )
 
 // AuthRequest is an authentication request.

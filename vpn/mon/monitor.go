@@ -3,13 +3,15 @@ package mon
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/ziutek/telnet"
+	"gopkg.in/reform.v1"
+
 	"github.com/privatix/dappctrl/data"
 	"github.com/privatix/dappctrl/util"
 	vpnutil "github.com/privatix/dappctrl/vpn/util"
-	"github.com/ziutek/telnet"
-	"gopkg.in/reform.v1"
-	"strconv"
-	"strings"
 )
 
 // Config is a configuration for OpenVPN monitor.

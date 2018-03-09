@@ -2,8 +2,9 @@ package srv
 
 import (
 	"encoding/json"
-	"gopkg.in/reform.v1"
 	"net/http"
+
+	"gopkg.in/reform.v1"
 )
 
 // VPN session server errors.

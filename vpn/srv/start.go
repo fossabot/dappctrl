@@ -1,12 +1,13 @@
 package srv
 
 import (
-	"github.com/privatix/dappctrl/data"
-	"github.com/privatix/dappctrl/util"
-	vpnutil "github.com/privatix/dappctrl/vpn/util"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/privatix/dappctrl/data"
+	"github.com/privatix/dappctrl/util"
+	vpnutil "github.com/privatix/dappctrl/vpn/util"
 )
 
 // StartRequest is a request to start a client session.

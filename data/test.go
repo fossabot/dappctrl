@@ -3,9 +3,11 @@
 package data
 
 import (
-	"github.com/privatix/dappctrl/util"
-	"gopkg.in/reform.v1"
 	"log"
+
+	"gopkg.in/reform.v1"
+
+	"github.com/privatix/dappctrl/util"
 )
 
 // TestData is a container for testing data items.

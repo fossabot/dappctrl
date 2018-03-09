@@ -3,8 +3,9 @@
 package util
 
 import (
-	"gopkg.in/reform.v1"
 	"testing"
+
+	"gopkg.in/reform.v1"
 )
 
 // SetChannelState assigns state to a given state channel.

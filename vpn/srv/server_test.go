@@ -3,15 +3,17 @@ package srv
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/privatix/dappctrl/data"
-	"github.com/privatix/dappctrl/util"
-	vpnutil "github.com/privatix/dappctrl/vpn/util"
-	"gopkg.in/reform.v1"
 	"log"
 	"net/http"
 	"os"
 	"testing"
 	"time"
+
+	"gopkg.in/reform.v1"
+
+	"github.com/privatix/dappctrl/data"
+	"github.com/privatix/dappctrl/util"
+	vpnutil "github.com/privatix/dappctrl/vpn/util"
 )
 
 var conf struct {

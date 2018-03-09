@@ -2,9 +2,10 @@ package util
 
 import (
 	"encoding/json"
-	"github.com/satori/go.uuid"
 	"os"
 	"path/filepath"
+
+	"github.com/satori/go.uuid"
 )
 
 // ReadJSONFile reads and parses a JSON file filling a given data instance.

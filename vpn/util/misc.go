@@ -1,8 +1,9 @@
 package util
 
 import (
-	"github.com/privatix/dappctrl/data"
 	"gopkg.in/reform.v1"
+
+	"github.com/privatix/dappctrl/data"
 )
 
 // FindCurrentSession finds a current session for a given state channel.

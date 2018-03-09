@@ -3,16 +3,18 @@ package mon
 import (
 	"bufio"
 	"fmt"
-	"github.com/privatix/dappctrl/data"
-	"github.com/privatix/dappctrl/util"
-	vpnutil "github.com/privatix/dappctrl/vpn/util"
-	"gopkg.in/reform.v1"
 	"io"
 	"net"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"gopkg.in/reform.v1"
+
+	"github.com/privatix/dappctrl/data"
+	"github.com/privatix/dappctrl/util"
+	vpnutil "github.com/privatix/dappctrl/vpn/util"
 )
 
 var conf struct {

@@ -1,11 +1,13 @@
 package srv
 
 import (
-	"github.com/AlekSi/pointer"
-	"github.com/privatix/dappctrl/data"
-	vpnutil "github.com/privatix/dappctrl/vpn/util"
 	"net/http"
 	"time"
+
+	"github.com/AlekSi/pointer"
+
+	"github.com/privatix/dappctrl/data"
+	vpnutil "github.com/privatix/dappctrl/vpn/util"
 )
 
 // StopRequest is a request to stop a client session.

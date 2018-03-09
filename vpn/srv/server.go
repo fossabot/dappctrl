@@ -1,9 +1,11 @@
 package srv
 
 import (
-	"github.com/privatix/dappctrl/util"
-	"gopkg.in/reform.v1"
 	"net/http"
+
+	"gopkg.in/reform.v1"
+
+	"github.com/privatix/dappctrl/util"
 )
 
 // Config is a configuration for VPN session server.
