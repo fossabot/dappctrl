@@ -36,7 +36,7 @@ git clone git@github.com:Privatix/dappctrl.git $DAPPCTRL_DIR
 go get -d $DAPPCTRL/...
 go get -u gopkg.in/reform.v1/reform
 go generate $DAPPCTRL
-go install $DAPPCTRL
+go install -tags=notest $DAPPCTRL
 ```
 
 Prepare a `dappctrl` database instance:
