@@ -20,7 +20,7 @@ type AuthReply struct {
 }
 
 func checkPassword(ch *data.Channel, pwd string) bool {
-	hash := sha3.Sum256([]byte(pwd + fmt.Sprint(ch.Solt)))
+	hash := sha3.Sum256([]byte(pwd + fmt.Sprint(ch.Salt)))
 	return base64.URLEncoding.EncodeToString(hash[:]) == ch.Password
 }
 

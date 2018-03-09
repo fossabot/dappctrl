@@ -76,7 +76,7 @@ type Channel struct {
 	State            string `reform:"state"`
 	TotalDeposit     string `reform:"total_deposit"`
 	ClosedDeposit    string `reform:"closed_deposit"`
-	Solt             uint64 `reform:"solt"`
+	Salt             uint64 `reform:"salt"`
 	Password         string `reform:"password"`
 	ReceiptBalance   string `reform:"receipt_balance"`
 	ReceiptSignature string `reform:"receipt_signature"`

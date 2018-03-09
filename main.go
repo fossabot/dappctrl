@@ -1,7 +1,5 @@
 package main
 
-//go:generate go generate github.com/privatix/dappctrl/data
-
 import (
 	"flag"
 	"github.com/privatix/dappctrl/data"
