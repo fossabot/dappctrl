@@ -1,3 +1,4 @@
+[![Go report](https://goreportcard.com/badge/github.com/Privatix/dappctrl)](https://goreportcard.com/badge/github.com/Privatix/dappctrl)
 [![Maintainability](https://api.codeclimate.com/v1/badges/7e76f071e5408b13ea53/maintainability)](https://codeclimate.com/github/Privatix/dappctrl/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/7e76f071e5408b13ea53/test_coverage)](https://codeclimate.com/github/Privatix/dappctrl/test_coverage)
 
