@@ -3,15 +3,17 @@ package srv
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/privatix/dappctrl/data"
-	"github.com/privatix/dappctrl/util"
-	vpnutil "github.com/privatix/dappctrl/vpn/util"
-	"gopkg.in/reform.v1"
 	"log"
 	"net/http"
 	"os"
 	"testing"
 	"time"
+
+	"gopkg.in/reform.v1"
+
+	"github.com/privatix/dappctrl/data"
+	"github.com/privatix/dappctrl/util"
+	vpnutil "github.com/privatix/dappctrl/vpn/util"
 )
 
 var conf struct {
@@ -73,8 +75,8 @@ const (
 
 func TestMalformedRequest(t *testing.T) {
 	for _, v := range []StartRequest{
-		{ClientIP: clientIP, ClientPort: 1234},
-		{ServerIP: serverIP, ClientPort: 1234},
+		{ClientIP: clientIP, ClientPort: clientPort},
+		{ServerIP: serverIP, ClientPort: clientPort},
 		{ServerIP: serverIP, ClientIP: clientIP},
 	} {
 		var repl AuthReply
@@ -206,6 +208,20 @@ func testRegularStop(t *testing.T, sid string) {
 
 	if vsess.Uploaded != uploaded || vsess.Downloaded != downloaded {
 		t.Fatalf("wrong vpn session uploaded/downloaded values")
+	}
+}
+
+func TestNonOpenChannel(t *testing.T) {
+	vpnutil.SetChannelState(t, db,
+		conf.TestData.Channel, data.ChannelClosing)
+	defer vpnutil.SetChannelState(t, db,
+		conf.TestData.Channel, data.ChannelOpen)
+
+	var repl StartReply
+	post(t, PathStart, newStartRequest(conf.TestData.Channel), &repl)
+	if repl.Error != ErrNonOpenChannel {
+		t.Fatalf("unexpected error while starting session "+
+			"for non-open channel: %s", repl.Error)
 	}
 }
 

@@ -1,6 +1,6 @@
-package util
+// +build !notest
 
-// +build test
+package util
 
 import (
 	"flag"

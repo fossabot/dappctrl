@@ -25,7 +25,7 @@ VALUES ('e5b231c0-16ed-11e8-b642-0ed5f89f718b',
 
 -- Test state channel with password: "secret".
 INSERT INTO channels (id, agent, client, offering, block, state, total_deposit,
-    closed_deposit, solt, password, receipt_balance, receipt_signature)
+    closed_deposit, salt, password, receipt_balance, receipt_signature)
 VALUES (
     'e5b23706-16ed-11e8-b642-0ed5f89f718b',
     'e5b22ad6-16ed-11e8-b642-0ed5f89f718b',

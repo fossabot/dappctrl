@@ -2,8 +2,9 @@ package srv
 
 import (
 	"encoding/json"
-	"gopkg.in/reform.v1"
 	"net/http"
+
+	"gopkg.in/reform.v1"
 )
 
 // VPN session server errors.
@@ -13,7 +14,7 @@ const (
 	ErrAccessDenied         = "ACCESS_DENIED"
 	ErrMalformedRequest     = "MALFORMED_REQUEST"
 	ErrObjectNotFound       = "OBJECT_NOT_FOUND"
-	ErrNoPositiveBalance    = "NO_POSITIVE_BALANCE"
+	ErrNonOpenChannel       = "NON_OPEN_CHANNEL"
 )
 
 type errorReply struct {

@@ -3,13 +3,15 @@ package mon
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/ziutek/telnet"
+	"gopkg.in/reform.v1"
+
 	"github.com/privatix/dappctrl/data"
 	"github.com/privatix/dappctrl/util"
 	vpnutil "github.com/privatix/dappctrl/vpn/util"
-	"github.com/ziutek/telnet"
-	"gopkg.in/reform.v1"
-	"strconv"
-	"strings"
 )
 
 // Config is a configuration for OpenVPN monitor.
@@ -83,6 +85,12 @@ func (m *Monitor) requestClients() error {
 	return nil
 }
 
+// Monitor errors.
+var (
+	ErrComm          = errors.New("openvpn communication error")
+	ErrTooOldOpenVPN = errors.New("too old OpenVPN version")
+)
+
 const (
 	prefixClientListHeader  = "HEADER,CLIENT_LIST,"
 	prefixClientList        = "CLIENT_LIST,"
@@ -113,17 +121,20 @@ func (m *Monitor) processReply(s string) error {
 
 	if strings.HasPrefix(s, prefixError) {
 		m.logger.Error("openvpn error: %s", s[len(prefixError):])
-		return errors.New("openvpn communication error")
+		return ErrComm
 	}
 
 	return nil
 }
 
+func split(s string) []string {
+	return strings.Split(strings.TrimRight(s, "\r\n"), ",")
+}
+
 func (m *Monitor) processClientList(s string) error {
-	sp := strings.Split(s, ",")
+	sp := split(s)
 	if len(sp) < 10 {
-		return errors.New("no cid returned for 'status 2' " +
-			"(too old openvpn version)")
+		return ErrTooOldOpenVPN
 	}
 
 	cid, err := strconv.ParseUint(sp[9], 10, 32)
@@ -139,7 +150,7 @@ func (m *Monitor) processClientList(s string) error {
 }
 
 func (m *Monitor) processByteCount(s string) error {
-	sp := strings.Split(strings.TrimRight(s, "\r\n"), ",")
+	sp := split(s)
 
 	cid, err := strconv.ParseUint(sp[0], 10, 32)
 	if err != nil {
@@ -192,13 +203,13 @@ func (m *Monitor) updateBytes(cl *client, up, down uint64) error {
 		return err
 	}
 
-	positive, err := vpnutil.HasPositiveBalance(m.db, cl.channel)
+	open, err := vpnutil.ChannelOpen(m.db, cl.channel)
 	if err != nil {
-		m.logger.Error("failed to check for positive balance: %s", err)
+		m.logger.Error("failed to check channel state: %s", err)
 		return err
 	}
 
-	if !positive {
+	if !open {
 		m.logger.Info("killing client session %s", sid)
 
 		cmd := fmt.Sprintf("kill %s\n", cl.commonName)
@@ -207,5 +218,13 @@ func (m *Monitor) updateBytes(cl *client, up, down uint64) error {
 		}
 	}
 
+	return nil
+}
+
+// Close immediately closes the monitor making MonitorTraffic() to return.
+func (m *Monitor) Close() error {
+	if m.conn != nil {
+		return m.conn.Close()
+	}
 	return nil
 }
