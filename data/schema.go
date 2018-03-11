@@ -72,7 +72,7 @@ type Channel struct {
 	Agent            string `reform:"agent"`
 	Client           string `reform:"client"`
 	Offering         string `reform:"offering"`
-	Block            uint   `block`
+	Block            uint   `reform:"block"`
 	State            string `reform:"state"`
 	TotalDeposit     string `reform:"total_deposit"`
 	ClosedDeposit    string `reform:"closed_deposit"`

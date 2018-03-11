@@ -2,12 +2,18 @@
     "DB": {
         "Conn": {
             "dbname": "dappctrl",
-            "sslmode": "disable"
+            "sslmode": "disable",
+            "user": "postgres"
         }
     },
 
     "Log": {
         "Level": "info"
+    },
+
+    "PaymentServer": {
+        "Addr": "localhost:9000",
+        "TLS": null
     },
 
     "TestData": {

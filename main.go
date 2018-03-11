@@ -2,18 +2,21 @@ package main
 
 import (
 	"flag"
+	"log"
+
 	"github.com/privatix/dappctrl/data"
+	"github.com/privatix/dappctrl/payment"
 	"github.com/privatix/dappctrl/util"
 	vpnmon "github.com/privatix/dappctrl/vpn/mon"
 	vpnsrv "github.com/privatix/dappctrl/vpn/srv"
-	"log"
 )
 
 type config struct {
-	DB         *data.DBConfig
-	Log        *util.LogConfig
-	VPNServer  *vpnsrv.Config
-	VPNMonitor *vpnmon.Config
+	DB            *data.DBConfig
+	Log           *util.LogConfig
+	PaymentServer *payment.Config
+	VPNServer     *vpnsrv.Config
+	VPNMonitor    *vpnmon.Config
 }
 
 func newConfig() *config {
@@ -60,5 +63,7 @@ func main() {
 			mon.MonitorTraffic())
 	}()
 
-	<-make(chan bool)
+	pmt := payment.NewServer(conf.PaymentServer, logger, db)
+	logger.Fatal("failed to start payment server: %v\n",
+		pmt.ListenAndServe())
 }
