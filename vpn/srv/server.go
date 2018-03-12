@@ -8,21 +8,23 @@ import (
 	"github.com/privatix/dappctrl/util"
 )
 
-// Config is a configuration for VPN session server.
-type Config struct {
-	Addr     string
+// TLSConfig is a tls configuration.
+type TLSConfig struct {
 	CertFile string
 	KeyFile  string
-	TLS      bool
+}
+
+// Config is a configuration for VPN session server.
+type Config struct {
+	Addr string
+	TLS  *TLSConfig
 }
 
 // NewConfig creates a default configuration for VPN session server.
 func NewConfig() *Config {
 	return &Config{
-		Addr:     "localhost:8080",
-		CertFile: "dappctrl.cert",
-		KeyFile:  "dappctrl.key",
-		TLS:      false,
+		Addr: "localhost:8080",
+		TLS:  nil,
 	}
 }
 
@@ -54,8 +56,8 @@ func (s *Server) ListenAndServe() error {
 	mux.HandleFunc(PathStop, s.handleStop)
 	s.srv.Handler = mux
 
-	if s.conf.TLS {
-		return s.srv.ListenAndServeTLS(s.conf.CertFile, s.conf.KeyFile)
+	if s.conf.TLS != nil {
+		return s.srv.ListenAndServeTLS(s.conf.TLS.CertFile, s.conf.TLS.KeyFile)
 	}
 
 	return s.srv.ListenAndServe()

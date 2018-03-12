@@ -28,8 +28,6 @@
 
     "VPNServer": {
         "Addr": "localhost:8080",
-        "CertFile": "dappctrl.cert",
-        "KeyFile": "dappctrl.key",
-        "TLS": false
+        "TLS": null
     }
 }
