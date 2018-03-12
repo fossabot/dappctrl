@@ -1,9 +1,14 @@
 package lib
 
-import "testing"
+import (
+	"testing"
+	"pxctrl/eth/lib/tests"
+)
+
 
 func TestGasPriceFetching(t *testing.T) {
-	client := NewEthereumClient(host, port)
+	node := tests.GethNodeConfig().Geth
+	client := NewEthereumClient(node.Host, node.Port)
 	response, err := client.GetGasPrice()
 	if err != nil {
 		t.Fatal(err)
@@ -16,7 +21,8 @@ func TestGasPriceFetching(t *testing.T) {
 }
 
 func TestBlockNumberFetching(t *testing.T) {
-	client := NewEthereumClient(host, port)
+	node := tests.GethNodeConfig().Geth
+	client := NewEthereumClient(node.Host, node.Port)
 	response, err := client.GetBlockNumber()
 	if err != nil {
 		t.Fatal(err)

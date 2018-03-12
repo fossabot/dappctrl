@@ -8,7 +8,7 @@ package lib
 // Note:
 // "abigen" is available in contract/tools, no need for building it itself.
 //
-// For details about events (logs in Ethereum terminology) fetching:
+// For details about events (logs in EthereumConf terminology) fetching:
 // https://ethereumbuilders.gitbooks.io/guide/content/en/ethereum_json_rpc.html
 
 import (

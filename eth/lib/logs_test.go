@@ -13,6 +13,7 @@ import (
 	"pxctrl/eth/contract"
 	"testing"
 	"bytes"
+	"pxctrl/eth/lib/tests"
 )
 
 const (
@@ -91,7 +92,7 @@ func fetchTestPrivateKey() string {
 func populateEvents() {
 	conn, err := ethclient.Dial("http://" + GanacheTestsInterface)
 	if err != nil {
-		log.Fatalf("Failed to connect to the Ethereum client: %v", err)
+		log.Fatalf("Failed to connect to the EthereumConf client: %v", err)
 	}
 
 	contractAddress, err := NewAddress(fetchPSCAddress())
@@ -101,7 +102,7 @@ func populateEvents() {
 
 	psc, err := contract.NewPrivatixServiceContract(contractAddress.Bytes(), conn)
 	if err != nil {
-		log.Fatal("Failed to connect to the Ethereum client: ", err)
+		log.Fatal("Failed to connect to the EthereumConf client: ", err)
 	}
 
 	pKeyBytes, err := hex.DecodeString(fetchTestPrivateKey())
@@ -207,7 +208,8 @@ func populateEvents() {
 func TestNormalLogsFetching(t *testing.T) {
 	populateEvents()
 
-	client := NewEthereumClient(host, port)
+	node := tests.GethNodeConfig().Geth
+	client := NewEthereumClient(node.Host, node.Port)
 
 	getEvent := func(eventDigest string) ([]string, string) {
 		response, err := client.GetLogs(
@@ -463,7 +465,8 @@ func TestNormalLogsFetching(t *testing.T) {
 }
 
 func TestNegativeLogsFetching(t *testing.T) {
-	client := NewEthereumClient(host, port)
+	node := tests.GethNodeConfig().Geth
+	client := NewEthereumClient(node.Host, node.Port)
 
 	{
 		// Test purpose:
@@ -497,9 +500,8 @@ func TestNegativeLogsFetching(t *testing.T) {
 }
 
 func TestLogsFetchingWithBrokenNetwork(t *testing.T) {
-	// todo: kill truffle node when API would be present
-
-	client := NewEthereumClient(host, port)
+	node := tests.GethNodeConfig().Geth
+	client := NewEthereumClient(node.Host, node.Port+1) // note: invalid port is used
 
 	{
 		// Test purpose:
