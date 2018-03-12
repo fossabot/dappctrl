@@ -59,12 +59,6 @@ Build OpenVPN session trigger:
 go install $DAPPCTRL/tool/dapptrig
 ```
 
-Checking installation succeed:
-```
-@dappctrl_team please, add how to make sure that
-installation was succeeded (if it possible)
-```
-
 # Tests
 
 ## Running the tests
