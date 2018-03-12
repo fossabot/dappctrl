@@ -7,7 +7,7 @@ import (
 
 
 func TestGasPriceFetching(t *testing.T) {
-	node := tests.GethNodeConfig().Geth
+	node := tests.GethEthereumConfig().Geth
 	client := NewEthereumClient(node.Host, node.Port)
 	response, err := client.GetGasPrice()
 	if err != nil {
@@ -21,7 +21,7 @@ func TestGasPriceFetching(t *testing.T) {
 }
 
 func TestBlockNumberFetching(t *testing.T) {
-	node := tests.GethNodeConfig().Geth
+	node := tests.GethEthereumConfig().Geth
 	client := NewEthereumClient(node.Host, node.Port)
 	response, err := client.GetBlockNumber()
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"encoding/json"
+	"fmt"
 )
 
 type GethNode struct {
@@ -11,16 +12,33 @@ type GethNode struct {
 	Port uint16 `json:"port"`
 }
 
-type EthereumConf struct {
-	Geth GethNode `json:"geth"`
+func (g *GethNode) Interface() string {
+	return fmt.Sprint("http://", g.Host, ":", g.Port)
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+
+type TruffleAPI struct {
+	Host string `json:"host"`
+	Port uint16 `json:"port"`
+}
+
+func (t *TruffleAPI) Interface() string {
+	return fmt.Sprint("http://", t.Host, ":", t.Port)
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+type EthereumConf struct {
+	Geth GethNode `json:"geth"`
+	TruffleAPI TruffleAPI `json:"truffle"`
+}
 
 var (
 	conf *EthereumConf = nil
 )
 
-func GethNodeConfig() *EthereumConf {
+func GethEthereumConfig() *EthereumConf {
 	if conf == nil {
 		loadTestConfig()
 	}

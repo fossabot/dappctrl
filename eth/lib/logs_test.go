@@ -16,12 +16,6 @@ import (
 	"pxctrl/eth/lib/tests"
 )
 
-const (
-	// todo: move to the global config file
-	TruffleTestsAPIInterface = "192.168.43.234:5000"
-	GanacheTestsInterface    = "192.168.43.234:8545"
-)
-
 var (
 	PrivateKey = ""
 	PSCAddress = ""
@@ -48,7 +42,8 @@ func fetchPSCAddress() string {
 		return PSCAddress
 	}
 
-	response, err := http.Get("http://" + TruffleTestsAPIInterface + "/getPSC")
+	truffleAPI := tests.GethEthereumConfig().TruffleAPI
+	response, err := http.Get(truffleAPI.Interface() + "/getPSC")
 	if err != nil || response.StatusCode != 200 {
 		log.Fatal("Can't fetch PSC address. It seems that test environment is broken.")
 	}
@@ -71,7 +66,8 @@ func fetchTestPrivateKey() string {
 		return PrivateKey
 	}
 
-	response, err := http.Get("http://" + TruffleTestsAPIInterface + "/getKeys")
+	truffleAPI := tests.GethEthereumConfig().TruffleAPI
+	response, err := http.Get(truffleAPI.Interface() + "/getKeys")
 	if err != nil || response.StatusCode != 200 {
 		log.Fatal("Can't fetch private key. It seems that test environment is broken.")
 	}
@@ -90,7 +86,8 @@ func fetchTestPrivateKey() string {
 }
 
 func populateEvents() {
-	conn, err := ethclient.Dial("http://" + GanacheTestsInterface)
+	geth := tests.GethEthereumConfig().Geth
+	conn, err := ethclient.Dial(geth.Interface())
 	if err != nil {
 		log.Fatalf("Failed to connect to the EthereumConf client: %v", err)
 	}
@@ -208,7 +205,7 @@ func populateEvents() {
 func TestNormalLogsFetching(t *testing.T) {
 	populateEvents()
 
-	node := tests.GethNodeConfig().Geth
+	node := tests.GethEthereumConfig().Geth
 	client := NewEthereumClient(node.Host, node.Port)
 
 	getEvent := func(eventDigest string) ([]string, string) {
@@ -465,7 +462,7 @@ func TestNormalLogsFetching(t *testing.T) {
 }
 
 func TestNegativeLogsFetching(t *testing.T) {
-	node := tests.GethNodeConfig().Geth
+	node := tests.GethEthereumConfig().Geth
 	client := NewEthereumClient(node.Host, node.Port)
 
 	{
@@ -500,7 +497,7 @@ func TestNegativeLogsFetching(t *testing.T) {
 }
 
 func TestLogsFetchingWithBrokenNetwork(t *testing.T) {
-	node := tests.GethNodeConfig().Geth
+	node := tests.GethEthereumConfig().Geth
 	client := NewEthereumClient(node.Host, node.Port+1) // note: invalid port is used
 
 	{
