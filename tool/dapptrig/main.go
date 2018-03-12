@@ -28,7 +28,7 @@ func newConfig() *config {
 	return &config{
 		LogFile:    "dapptrig.log",
 		ServerAddr: conf.Addr,
-		ServerTLS:  conf.TLS,
+		ServerTLS:  conf.TLS != nil,
 		ChannelDir: "channels",
 	}
 }

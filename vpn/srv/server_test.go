@@ -28,7 +28,7 @@ var srv *Server
 
 func postRaw(t *testing.T, path string, data []byte, rep interface{}) {
 	var proto = "http"
-	if conf.VPNServer.TLS {
+	if conf.VPNServer.TLS != nil {
 		proto += "s"
 	}
 
