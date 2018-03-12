@@ -33,6 +33,7 @@ type Event interface {
 
 //---------------------------------------------------------------------------------------------------------------------
 
+// todo: here and elsewhere: To clearly deliver the meaning, I would suggest to change naming style here and in other place from NewEventServiceOfferingCreated to NewServiceOfferingCreatedEvent
 type EventChannelCreated struct {
 	Client            *Address // indexed
 	Agent             *Address // indexed

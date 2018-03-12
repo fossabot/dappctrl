@@ -16,14 +16,14 @@ type Address struct {
 func NewAddress(hexRepresentation string) (*Address, error) {
 	hexSource := hexRepresentation
 
+	if len(hexSource) != addressBytesLength*2 && len(hexSource) != (addressBytesLength*2) + 2 { // "0x..."
+		return nil, errors.New("address might be decoded from 40 symbols long hex string literal only")
+	}
+
 	// In case if address is prefixed with 0x -
 	// it should be removed for proper decoding.
 	if hexSource[:2] == "0x" {
 		hexSource = hexSource[2:]
-	}
-
-	if len(hexSource) != addressBytesLength*2 {
-		return nil, errors.New("address might be decoded from 40 symbols long hex string literal only")
 	}
 
 	decodedAddress, err := hex.DecodeString(hexSource)
@@ -61,11 +61,12 @@ func NewUint256(hexRepresentation string) (*Uint256, error) {
 
 	// Hex representation might be shorter, than 64 symbols,
 	// but must not be longer than 64 symbols.
-	if len(hexSource) == 0 || len(hexSource) > 2 + (256/8*2) {
+	const hexRepresentationLength = 256/8*2
+	if len(hexSource) == 0 || len(hexSource) > 2 + hexRepresentationLength {
 		return nil, errors.New("uint256 might be decoded from strings like 0x{64 symbols}")
 	}
 
-	if len(hexSource) == 2 + (256/8*2) && hexSource[:2] != "0x" {
+	if len(hexSource) == 2 + hexRepresentationLength && hexSource[:2] != "0x" {
 		return nil, errors.New("uint256 might be decoded from strings like 0x{64 symbols}")
 	}
 
@@ -110,11 +111,12 @@ func NewUint192(hexRepresentation string) (*Uint192, error) {
 
 	// Hex representation might be shorter, than 48 symbols,
 	// but must not be longer than 42 symbols.
-	if len(hexSource) == 0 || len(hexSource) > 2 + (192/8*2) {
+	const hexRepresentationLength = 192/8*2
+	if len(hexSource) == 0 || len(hexSource) > 2 + hexRepresentationLength {
 		return nil, errors.New("uint256 might be decoded from strings like 0x{48 symbols}")
 	}
 
-	if len(hexSource) == 2 + (192/8*2) && hexSource[:2] != "0x" {
+	if len(hexSource) == 2 + hexRepresentationLength && hexSource[:2] != "0x" {
 		return nil, errors.New("uint256 might be decoded from strings like 0x{48 symbols}")
 	}
 

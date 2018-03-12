@@ -252,10 +252,6 @@ func TestNormalLogsFetching(t *testing.T) {
 				t.Fatal()
 			}
 
-			if event.OfferingHash.String() != testUint256Zero.String() {
-				t.Fatal()
-			}
-
 			if event.Deposit.String() != testUint192Zero.String() {
 				t.Fatal()
 			}
@@ -506,7 +502,7 @@ func TestLogsFetchingWithBrokenNetwork(t *testing.T) {
 
 		_, err := client.GetLogs(
 			fetchPSCAddress(),
-			[]string{"0x8a79bd24ee9bcfd977d6fc685befa8775c8a933f0abe82ab73b716cf419f968e"}, "", "")
+			[]string{EthOfferingCreated}, "", "")
 		if err == nil {
 			t.Fatal("Error must be returned")
 		}

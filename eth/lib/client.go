@@ -36,7 +36,7 @@ func NewEthereumClient(host string, port uint16) *EthereumClient {
 		Host: host,
 		Port: port,
 
-		// By default, standard http-client does not uses any timeout for it's operations.
+		// By default, standard http-client does not uses any timeout for its operations.
 		// But, there is non zero probability, that remote geth-node would hang for a long time.
 		// To avoid cascade client/agent side application hangs - timeout is used.
 		client: http.Client{
@@ -50,7 +50,7 @@ type apiResponse struct {
 	ID      uint64 `json:"id"`
 	JsonRPC string `json:"jsonrpc"`
 
-	// All responses also contains "result" field,
+	// All responses also contain "result" field,
 	// but from method to method it might have various different types,
 	// so it is delegated to the specified response types.
 }

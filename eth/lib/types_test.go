@@ -52,6 +52,20 @@ func TestAddressCreating(t *testing.T) {
 		// Error must be returned.
 		checkInvalidHex("0xffffffffffffffffffffffffffffffffffffffffaaaa")
 	}
+
+	{
+		// Test purpose:
+		// To check address decoding, using broken address (shorter string repr, than is required).
+		// Error must be returned.
+		checkInvalidHex("0")
+	}
+
+	{
+		// Test purpose:
+		// To check address decoding, using broken address (zero length string).
+		// Error must be returned.
+		checkInvalidHex("")
+	}
 }
 
 func TestUint256Creating(t *testing.T) {
@@ -96,9 +110,9 @@ func TestUint256Creating(t *testing.T) {
 		// To check uint192 decoding, using valid hex representations,
 		// that contains only 4 bits (one symbol only after 0x).
 		checkValidHex("0x0", "")
-		//checkValidHex("0x1", "")
-		//checkValidHex("0x2", "")
-		//checkValidHex("0x9", "")
+		checkValidHex("0x1", "")
+		checkValidHex("0x2", "")
+		checkValidHex("0x9", "")
 	}
 
 	{
