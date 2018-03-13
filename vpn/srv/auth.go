@@ -1,11 +1,13 @@
-package vpn
+package srv
 
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/privatix/dappctrl/data"
-	"golang.org/x/crypto/sha3"
 	"net/http"
+
+	"golang.org/x/crypto/sha3"
+
+	"github.com/privatix/dappctrl/data"
 )
 
 // AuthRequest is an authentication request.
@@ -20,7 +22,7 @@ type AuthReply struct {
 }
 
 func checkPassword(ch *data.Channel, pwd string) bool {
-	hash := sha3.Sum256([]byte(pwd + fmt.Sprint(ch.Solt)))
+	hash := sha3.Sum256([]byte(pwd + fmt.Sprint(ch.Salt)))
 	return base64.URLEncoding.EncodeToString(hash[:]) == ch.Password
 }
 

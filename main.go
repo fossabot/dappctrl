@@ -1,27 +1,30 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
-	"github.com/privatix/dappctrl/data"
-	"github.com/privatix/dappctrl/util"
-	vpnserv "github.com/privatix/dappctrl/vpn/serv"
 	"log"
+
+	"github.com/privatix/dappctrl/data"
+	"github.com/privatix/dappctrl/payment"
+	"github.com/privatix/dappctrl/util"
+	vpnmon "github.com/privatix/dappctrl/vpn/mon"
+	vpnsrv "github.com/privatix/dappctrl/vpn/srv"
 )
 
-//go:generate go generate github.com/privatix/dappctrl/data
-
 type config struct {
-	DB        *data.DBConfig
-	Log       *util.LogConfig
-	VPNServer *vpnserv.Config
+	DB            *data.DBConfig
+	Log           *util.LogConfig
+	PaymentServer *payment.Config
+	VPNServer     *vpnsrv.Config
+	VPNMonitor    *vpnmon.Config
 }
 
 func newConfig() *config {
 	return &config{
-		DB:        data.NewDBConfig(),
-		Log:       util.NewLogConfig(),
-		VPNServer: vpnserv.NewConfig(),
+		DB:         data.NewDBConfig(),
+		Log:        util.NewLogConfig(),
+		VPNServer:  vpnsrv.NewConfig(),
+		VPNMonitor: vpnmon.NewConfig(),
 	}
 }
 
@@ -42,13 +45,25 @@ func main() {
 
 	db, err := data.NewDB(conf.DB, logger)
 	if err != nil {
-		logger.Fatal("failed to open DB connection: %s\n", err)
+		logger.Fatal("failed to open db connection: %s\n", err)
 	}
-	defer db.DBInterface().(*sql.DB).Close()
+	defer data.CloseDB(db)
 
-	server := vpnserv.NewServer(conf.VPNServer, logger, db)
+	srv := vpnsrv.NewServer(conf.VPNServer, logger, db)
+	defer srv.Close()
+	go func() {
+		logger.Fatal("failed to serve vpn session requests: %s\n",
+			srv.ListenAndServe())
+	}()
 
-	if err := server.ListenAndServe(); err != nil {
-		logger.Fatal("failed to start VPN session server: %s\n", err)
-	}
+	mon := vpnmon.NewMonitor(conf.VPNMonitor, logger, db)
+	defer mon.Close()
+	go func() {
+		logger.Fatal("failed to monitor vpn traffic: %s\n",
+			mon.MonitorTraffic())
+	}()
+
+	pmt := payment.NewServer(conf.PaymentServer, logger, db)
+	logger.Fatal("failed to start payment server: %v\n",
+		pmt.ListenAndServe())
 }

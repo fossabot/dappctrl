@@ -1,10 +1,10 @@
-package vpn
+package srv
 
 import (
-	"database/sql"
 	"encoding/json"
-	"gopkg.in/reform.v1"
 	"net/http"
+
+	"gopkg.in/reform.v1"
 )
 
 // VPN session server errors.
@@ -14,7 +14,7 @@ const (
 	ErrAccessDenied         = "ACCESS_DENIED"
 	ErrMalformedRequest     = "MALFORMED_REQUEST"
 	ErrObjectNotFound       = "OBJECT_NOT_FOUND"
-	ErrNoPositiveBalance    = "NO_POSITIVE_BALANCE"
+	ErrNonOpenChannel       = "NON_OPEN_CHANNEL"
 )
 
 type errorReply struct {
@@ -49,25 +49,19 @@ func (s *Server) replyInternalError(w http.ResponseWriter) {
 }
 
 func (s *Server) findByPrimaryKey(w http.ResponseWriter,
-	rec reform.Record, internalErrorIfNotFound bool) bool {
+	rec reform.Record, failIfNotFound bool) bool {
 	err := s.db.FindByPrimaryKeyTo(rec, rec.PKPointer())
 	if err == nil {
 		return true
 	}
 
-	if err == sql.ErrNoRows {
-		msg := "primary key %v not found in %s"
-		if internalErrorIfNotFound {
-			s.logger.Error(msg, rec.PKValue(), rec.Table().Name())
-			s.replyInternalError(w)
-		} else {
-			s.logger.Warn(msg, rec.PKValue(), rec.Table().Name())
-			s.reply(w, errorReply{ErrObjectNotFound})
-		}
-	} else {
-		s.logger.Error("failed to search in %v: %s",
-			rec.Table().Name(), err)
+	msg := "failed to find primary key %v in %v: %s"
+	if failIfNotFound {
+		s.logger.Error(msg, rec.PKValue(), rec.Table().Name(), err)
 		s.replyInternalError(w)
+	} else {
+		s.logger.Warn(msg, rec.PKValue(), rec.Table().Name(), err)
+		s.reply(w, errorReply{ErrObjectNotFound})
 	}
 
 	return false

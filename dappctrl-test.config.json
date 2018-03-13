@@ -2,7 +2,8 @@
     "DB": {
         "Conn": {
             "dbname": "dappctrl",
-            "sslmode": "disable"
+            "sslmode": "disable",
+            "user": "postgres"
         }
     },
 
@@ -13,6 +14,11 @@
     "PaymentServer": {
         "Addr": "localhost:9000",
         "TLS": null
+    },
+
+    "TestData": {
+        "Channel": "e5b23706-16ed-11e8-b642-0ed5f89f718b",
+        "Password": "secret"
     },
 
     "VPNMonitor": {

@@ -60,6 +60,7 @@ type VPNOffering struct {
 // Channel states.
 const (
 	ChannelOpen         = "open"
+	ChannelClosing      = "closing"
 	ChannelClosedCoop   = "closed_coop"
 	ChannelClosedUncoop = "closed_uncoop"
 )
@@ -71,11 +72,11 @@ type Channel struct {
 	Agent            string `reform:"agent"`
 	Client           string `reform:"client"`
 	Offering         string `reform:"offering"`
-	Block            uint   `block`
+	Block            uint   `reform:"block"`
 	State            string `reform:"state"`
 	TotalDeposit     string `reform:"total_deposit"`
 	ClosedDeposit    string `reform:"closed_deposit"`
-	Solt             uint64 `reform:"solt"`
+	Salt             uint64 `reform:"salt"`
 	Password         string `reform:"password"`
 	ReceiptBalance   string `reform:"receipt_balance"`
 	ReceiptSignature string `reform:"receipt_signature"`

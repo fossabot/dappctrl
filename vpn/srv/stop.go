@@ -1,11 +1,13 @@
-package vpn
+package srv
 
 import (
-	"github.com/AlekSi/pointer"
-	"github.com/privatix/dappctrl/data"
-	vpnutil "github.com/privatix/dappctrl/vpn/util"
 	"net/http"
 	"time"
+
+	"github.com/AlekSi/pointer"
+
+	"github.com/privatix/dappctrl/data"
+	vpnutil "github.com/privatix/dappctrl/vpn/util"
 )
 
 // StopRequest is a request to stop a client session.
@@ -30,8 +32,8 @@ func (s *Server) handleStop(w http.ResponseWriter, r *http.Request) {
 
 	sid, err := vpnutil.FindCurrentSession(s.db, req.Channel)
 	if err != nil {
-		s.logger.Error("failed to find session: %s", err)
-		s.replyInternalError(w)
+		s.logger.Warn("failed to find session: %s", err)
+		s.reply(w, errorReply{ErrObjectNotFound})
 		return
 	}
 

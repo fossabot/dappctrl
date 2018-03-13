@@ -2,12 +2,14 @@ package data
 
 import (
 	"database/sql"
+	"strings"
+
 	// Load Go Postgres driver.
 	_ "github.com/lib/pq"
-	"github.com/privatix/dappctrl/util"
 	"gopkg.in/reform.v1"
 	"gopkg.in/reform.v1/dialects/postgresql"
-	"strings"
+
+	"github.com/privatix/dappctrl/util"
 )
 
 // DBConfig is a DB configuration.
@@ -46,4 +48,9 @@ func NewDB(conf *DBConfig, logger *util.Logger) (*reform.DB, error) {
 
 	return reform.NewDB(conn,
 		postgresql.Dialect, reform.NewPrintfLogger(logger.Debug)), nil
+}
+
+// CloseDB closes database connection.
+func CloseDB(db *reform.DB) {
+	db.DBInterface().(*sql.DB).Close()
 }
