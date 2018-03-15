@@ -1,10 +1,14 @@
 package util
 
 import (
+	"encoding/base64"
 	"encoding/json"
-	"github.com/satori/go.uuid"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/ethereum/go-ethereum/common/number"
+	uuid "github.com/satori/go.uuid"
 )
 
 // ReadJSONFile reads and parses a JSON file filling a given data instance.
@@ -31,4 +35,20 @@ func ExeDirJoin(elem ...string) string {
 	}
 	elem = append([]string{filepath.Dir(exe)}, elem...)
 	return filepath.Join(elem...)
+}
+
+// EthNumToBase64 returns eth's number.Number as base64 encoded string.
+func EthNumToBase64(x *number.Number) string {
+	return base64.URLEncoding.EncodeToString(x.Bytes())
+}
+
+// Base64ToEthNum returns eth's number.Number from base64 encoded string.
+func Base64ToEthNum(b64X string) (*number.Number, error) {
+	b, err := base64.URLEncoding.DecodeString(strings.TrimSpace(b64X))
+	if err != nil {
+		return nil, err
+	}
+	x := number.Big(0)
+	x.SetBytes(b)
+	return x, nil
 }
