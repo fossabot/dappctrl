@@ -33,11 +33,11 @@
 
     "EthereumLib": {
         "geth": {
-            "host": "geth-node.server",
+            "host": "localhost",
             "port": 8545
         },
         "truffle": {
-            "host": "geth-node.server",
+            "host": "localhost",
             "port": 5000
         }
     }
