@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -11,9 +12,8 @@ import (
 	"math/big"
 	"net/http"
 	"pxctrl/eth/contract"
-	"testing"
-	"bytes"
 	"pxctrl/eth/lib/tests"
+	"testing"
 )
 
 var (
@@ -21,21 +21,21 @@ var (
 	PSCAddress = ""
 
 	// Test sets of dummy data.
-	// Used as placeholders for parameters in contract methods calls.
-	testEthAddress1    = [20]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	testEthAddress2    = [20]byte{255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}
-	testByte32SetZero  = [32]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	testByte32SetFull  = [32]byte{255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}
-	testUint256Zero, _ = NewUint256("0")
-	testUint256Full, _ = NewUint256("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
-	testUint192Zero, _ = NewUint192("0")
+	// Used as placeholders for parameters is contract methods calls.
+	addr1       = [20]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	addr2       = [20]byte{255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}
+	b32Zero     = [32]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	b32Full     = [32]byte{255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}
+	u256Zero, _ = NewUint256("0")
+	u256Full, _ = NewUint256("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+	u192Zero, _ = NewUint192("0")
 )
 
 // Internal methods
 //---------------------------------------------------------------------------------------------------------------------
 
-// fetchPSCAddress returns address of PSC in the currently active test chain.
-// In case of successfully retrieved address  - caches retrieved address and returns it on the next calls,
+// fetchPSCAddress returns address of PSC is the currently active test chain.
+// is case of successfully retrieved address  - caches retrieved address and returns it on the next calls,
 // instead of doing redundant requests.
 func fetchPSCAddress() string {
 	if PSCAddress != "" {
@@ -61,6 +61,7 @@ func fetchPSCAddress() string {
 	return PSCAddress
 }
 
+// fetchTestPrivateKey returns first available private key, that is provided by the truffle.
 func fetchTestPrivateKey() string {
 	if PrivateKey != "" {
 		return PrivateKey
@@ -86,137 +87,99 @@ func fetchTestPrivateKey() string {
 }
 
 func populateEvents() {
+	failOnErr := func(err error, args... interface{}) {
+		if err != nil {
+			log.Fatal(args, " / Error details: ", err)
+		}
+	}
+
 	geth := tests.GethEthereumConfig().Geth
 	conn, err := ethclient.Dial(geth.Interface())
-	if err != nil {
-		log.Fatalf("Failed to connect to the EthereumConf client: %v", err)
-	}
+	failOnErr(err, "Failed to connect to the EthereumConf client")
 
 	contractAddress, err := NewAddress(fetchPSCAddress())
-	if err != nil {
-		log.Fatal("Failed to parse received contract address: ", err)
-	}
+	failOnErr(err, "Failed to parse received contract address")
 
 	psc, err := contract.NewPrivatixServiceContract(contractAddress.Bytes(), conn)
-	if err != nil {
-		log.Fatal("Failed to connect to the EthereumConf client: ", err)
-	}
+	failOnErr(err, "Failed to connect to the EthereumConf client")
 
 	pKeyBytes, err := hex.DecodeString(fetchTestPrivateKey())
-	if err != nil {
-		log.Fatal("Failed to fetch test private key from the API: ", err)
-	}
+	failOnErr(err, "Failed to fetch test private key from the API")
 
 	key, err := crypto.ToECDSA(pKeyBytes)
-	if err != nil {
-		log.Fatal("Failed parse received test private key: ", err)
-	}
+	failOnErr(err, "Failed parse received test private key")
 
 	auth := bind.NewKeyedTransactor(key)
 
 	// Events populating
-	//
-	// WARN: note events arguments.
-	// Them would be used for the further events deserialization tests.
-	{
-		_, err := psc.ThrowEventLogChannelCreated(
-			auth, testEthAddress1, testEthAddress2, testByte32SetZero, big.NewInt(0), testByte32SetFull)
+	_, err = psc.ThrowEventLogChannelCreated(auth, addr1, addr2, b32Zero, big.NewInt(0), b32Full)
+	failOnErr(err, "Failed to call ThrowEventLogChannelCreated")
 
-		if err != nil {
-			log.Fatal("Failed to call ThrowEventLogChannelCreated: ", err)
-		}
-	}
-
-	{
-		_, err := psc.ThrowEventLogChannelToppedUp(
-			auth, testEthAddress1, testEthAddress2, 0, testByte32SetFull, big.NewInt(0))
-
-		if err != nil {
-			log.Fatal("Failed to call ThrowEventLogChannelToppedUp: ", err)
-		}
-	}
+	_, err = psc.ThrowEventLogChannelToppedUp(auth, addr1, addr2, 0, b32Full, big.NewInt(0))
+	failOnErr(err, "Failed to call ThrowEventLogChannelToppedUp")
 
 	// todo: uncomment when API would be fixed
-	//{
-	//	_, err := psc.ThrowEventLogChannelCloseRequested(
-	//		auth, testEthAddress1, testEthAddress2, testByte32SetZero, big.NewInt(0), testByte32SetFull)
-	//
-	//	if err != nil {
-	//		log.Fatal("Failed to call ThrowEventLogChannelCloseRequested: ", err)
-	//	}
-	//}
+	//_, err = psc.ThrowEventLogChannelCloseRequested(
+	//	auth, addr1, addr2, 0, b32Full, big.NewInt(0))
+	//failOnErr(err, "Failed to call ThrowEventLogChannelCloseRequested")
 
-	{
-		_, err := psc.ThrowEventLogServiceOfferingCreated(
-			auth, testEthAddress1, testByte32SetZero, big.NewInt(0), 0)
+	_, err = psc.ThrowEventLogServiceOfferingCreated(auth, addr1, b32Zero, big.NewInt(0), 0)
+	failOnErr(err, "Failed to call ThrowEventLogServiceOfferingCreated")
 
-		if err != nil {
-			log.Fatal("Failed to call ThrowEventLogServiceOfferingCreated: ", err)
-		}
-	}
+	_, err = psc.ThrowEventLogServiceOfferingDeleted(auth, b32Zero)
+	failOnErr(err, "Failed to call ThrowEventLogServiceOfferingDeleted")
 
-	{
-		_, err := psc.ThrowEventLogServiceOfferingDeleted(auth, testByte32SetZero)
-		if err != nil {
-			log.Fatal("Failed to call ThrowEventLogServiceOfferingDeleted: ", err)
-		}
-	}
+	_, err = psc.ThrowEventLogServiceOfferingEndpoint(auth, addr1, b32Zero, 0, b32Full)
+	failOnErr(err, "Failed to call ThrowEventLogServiceOfferingEndpoint")
 
-	{
-		_, err := psc.ThrowEventLogServiceOfferingEndpoint(
-			auth, testEthAddress1, testByte32SetZero, 0, testByte32SetFull)
+	_, err = psc.ThrowEventLogServiceOfferingSupplyChanged(auth, b32Zero, 0)
+	failOnErr(err, "Failed to call ThrowEventLogServiceOfferingSupplyChanged")
 
-		if err != nil {
-			log.Fatal("Failed to call ThrowEventLogServiceOfferingEndpoint: ", err)
-		}
-	}
+	_, err = psc.ThrowEventLogServiceOfferingPopedUp(auth, b32Zero)
+	failOnErr(err, "Failed to call ThrowEventLogServiceOfferingPopedUp")
 
-	{
-		_, err := psc.ThrowEventLogServiceOfferingSupplyChanged(auth, testByte32SetZero, 0)
-		if err != nil {
-			log.Fatal("Failed to call ThrowEventLogServiceOfferingSupplyChanged: ", err)
-		}
-	}
+	_, err = psc.ThrowEventLogCooperativeChannelClose(auth, addr1, addr2, 0, b32Full, big.NewInt(0))
+	failOnErr(err, "Failed to call ThrowEventLogCooperativeChannelClose")
 
-	{
-		_, err := psc.ThrowEventLogServiceOfferingPopedUp(auth, testByte32SetZero)
-		if err != nil {
-			log.Fatal("Failed to call ThrowEventLogServiceOfferingPopedUp: ", err)
-		}
-	}
-
-	{
-		_, err := psc.ThrowEventLogCooperativeChannelClose(
-			auth, testEthAddress1, testEthAddress2, 0, testByte32SetFull, big.NewInt(0))
-		if err != nil {
-			log.Fatal("Failed to call ThrowEventLogCooperativeChannelClose: ", err)
-		}
-	}
-
-	{
-		_, err := psc.ThrowEventLogUnCooperativeChannelClose(
-			auth, testEthAddress1, testEthAddress2, 0, testByte32SetFull, big.NewInt(0))
-		if err != nil {
-			log.Fatal("Failed to call ThrowEventLogUnCooperativeChannelClose: ", err)
-		}
-	}
+	_, err = psc.ThrowEventLogUnCooperativeChannelClose(auth, addr1, addr2, 0, b32Full, big.NewInt(0))
+	failOnErr(err, "Failed to call ThrowEventLogUnCooperativeChannelClose")
 }
 
 func TestNormalLogsFetching(t *testing.T) {
 	populateEvents()
-
 	node := tests.GethEthereumConfig().Geth
 	client := NewEthereumClient(node.Host, node.Port)
 
-	getEvent := func(eventDigest string) ([]string, string) {
+	failOnErr := func(err error, args... interface{}) {
+		if err != nil {
+			t.Fatal(args, " / Error details: ", err)
+		}
+	}
+
+	cmpBytes := func(a, b []byte, errorMessage string) {
+		if bytes.Compare(a, b) != 0 {
+			t.Fatal(errorMessage)
+		}
+	}
+
+	cmpU256 := func(a, b *Uint256, errorMessage string) {
+		if a.String() != b.String() {
+			t.Fatal(errorMessage)
+		}
+	}
+
+	cmpU192 := func(a, b *Uint192, errorMessage string) {
+		if a.String() != b.String() {
+			t.Fatal(errorMessage)
+		}
+	}
+
+	fetchEventData := func(eventDigest string) ([]string, string) {
 		response, err := client.GetLogs(
 			fetchPSCAddress(),
 			[]string{"0x" + eventDigest}, "", "")
 
-		if err != nil {
-			t.Fatal("Can't call API: ", err, " Event digest: ", eventDigest)
-		}
-
+		failOnErr(err, "Can't call API: ", err, " Event digest: ", eventDigest)
 		if len(response.Result) == 0 {
 			t.Fatal("Can't fetch result. Event digest: ", eventDigest)
 		}
@@ -225,271 +188,131 @@ func TestNormalLogsFetching(t *testing.T) {
 	}
 
 	{
-		// Test purpose:
-		// Check if all events types are accessible via raw API call.
+		topics, data := fetchEventData(EthDigestChannelCreated)
+		event, err := NewEventChannelCreated([4]string{topics[0], topics[1], topics[2], topics[3]}, data)
+		failOnErr(err, "Can't create EventChannelCreated")
 
-		{
-			topics, data := getEvent(EthDigestChannelCreated)
-			event, err := NewEventChannelCreated(
-				[4]string{topics[0], topics[1], topics[2], topics[3]}, data)
+		client := event.Client.Bytes()
+		agent := event.Agent.Bytes()
 
-			if err != nil {
-				t.Fatal("Can't create event NewEventChannelCreated: ", err)
-			}
+		cmpBytes(client[:], addr1[:], "ChannelCreated: client is unexpected")
+		cmpBytes(agent[:], addr2[:], "ChannelCreated: agent is unexpected")
+		cmpU256(event.OfferingHash, u256Zero, "ChannelCreated: offering hash is unexpected")
+		cmpU192(event.Deposit, u192Zero, "ChannelCreated: deposit is unexpected")
+	}
 
-			// Comparing received parameters with originally sent values.
-			clientAddress := event.Client.Bytes()
-			if bytes.Compare(clientAddress[:], testEthAddress1[:]) != 0 {
-				t.Fatal()
-			}
+	{
+		topics, data := fetchEventData(EthDigestChannelToppedUp)
+		event, err := NewEventChannelToppedUp([4]string{topics[0], topics[1], topics[2], topics[3]}, data)
+		failOnErr(err, "Can't create EventChannelToppedUp")
 
-			agentAddress := event.Agent.Bytes()
-			if bytes.Compare(agentAddress[:], testEthAddress2[:]) != 0 {
-				t.Fatal()
-			}
+		client := event.Client.Bytes()
+		agent := event.Agent.Bytes()
 
-			if event.OfferingHash.String() != testUint256Zero.String() {
-				t.Fatal()
-			}
+		cmpBytes(client[:], addr1[:], "ChannelToppedUp: client address is unexpected")
+		cmpBytes(agent[:], addr2[:], "ChannelToppedUp: agent address is unexpected")
+		cmpU256(event.OpenBlockNumber, u256Zero, "ChannelToppedUp: open block number is unexpected")
+		cmpU256(event.OfferingHash, u256Full, "ChannelToppedUp: offering hash is unexpected")
+		cmpU192(event.AddedDeposit, u192Zero, "ChannelToppedUp: added deposit is unexpected")
+	}
 
-			if event.Deposit.String() != testUint192Zero.String() {
-				t.Fatal()
-			}
-		}
+	{
+		topics, data := fetchEventData(EthOfferingCreated)
+		event, err := NewEventServiceOfferingCreated([3]string{topics[0], topics[1], topics[2]}, data)
+		failOnErr(err, "Can't create EventOfferingCreated")
 
-		{
-			topics, data := getEvent(EthDigestChannelToppedUp)
-			event, err := NewEventChannelToppedUp(
-				[4]string{topics[0], topics[1], topics[2], topics[3]}, data)
+		agent := event.Agent.Bytes()
+		cmpBytes(agent[:], addr1[:], "OfferingCreated: client address is unexpected")
+		cmpU256(event.OfferingHash, u256Zero, "OfferingCreated: offering hash is unexpected")
+		cmpU192(event.MinDeposit, u192Zero, "OfferingCreated: min deposit is unexpected")
+		cmpU192(event.CurrentSupply, u192Zero, "OfferingCreated: current supply is unexpected")
+	}
 
-			if err != nil {
-				t.Fatal("Can't create event NewEventChannelToppedUp: ", err)
-			}
+	{
+		topics, _ := fetchEventData(EthOfferingDeleted)
+		event, err := NewEventServiceOfferingDeleted([2]string{topics[0], topics[1]})
+		failOnErr(err, "Can't create EventServiceOfferingDeleted")
 
-			// Comparing received parameters with originally sent values.
-			clientAddress := event.Client.Bytes()
-			if bytes.Compare(clientAddress[:], testEthAddress1[:]) != 0 {
-				t.Fatal()
-			}
+		cmpU256(event.OfferingHash, u256Zero, "OfferingCreated: offering hash is unexpected")
+	}
 
-			agentAddress := event.Agent.Bytes()
-			if bytes.Compare(agentAddress[:], testEthAddress2[:]) != 0 {
-				t.Fatal()
-			}
+	{
+		topics, data := fetchEventData(EthServiceOfferingEndpoint)
+		event, err := NewEventServiceOfferingEndpoint([4]string{topics[0], topics[1], topics[2], topics[3]}, data)
+		failOnErr(err, "Can't create EventServiceOfferingEndpoint")
 
-			if event.OpenBlockNumber.String() != testUint256Zero.String() {
-				t.Fatal()
-			}
+		client := event.Client.Bytes()
+		cmpBytes(client[:], addr1[:], "ServiceOfferingEndpoint: client address is unexpected")
+		cmpU256(event.OfferingHash, u256Zero, "ServiceOfferingEndpoint: offering hash is unexpected")
+		cmpU256(event.OpenBlockNumber, u256Zero, "ServiceOfferingEndpoint: open block number is unexpected")
+		cmpU256(event.EndpointHash, u256Full, "ServiceOfferingEndpoint: endpoint hash is unexpected")
+	}
 
-			if event.OfferingHash.String() != testUint256Full.String() {
-				t.Fatal()
-			}
+	{
+		topics, data := fetchEventData(EthServiceOfferingSupplyChanged)
+		event, err := NewEventServiceOfferingSupplyChanged([2]string{topics[0], topics[1]}, data)
+		failOnErr(err, "Can't create EventServiceOfferingSupplyChanged")
 
-			if event.AddedDeposit.String() != testUint192Zero.String() {
-				t.Fatal()
-			}
-		}
+		cmpU256(event.OfferingHash, u256Zero, "ServiceOfferingSupplyChanged: offering hash is unexpected")
+		cmpU192(event.CurrentSupply, u192Zero, "ServiceOfferingSupplyChanged: current supply is unexpected")
+	}
 
-		{
-			topics, data := getEvent(EthOfferingCreated)
-			event, err := NewEventServiceOfferingCreated(
-				[3]string{topics[0], topics[1], topics[2]}, data)
+	{
+		topics, _ := fetchEventData(EthServiceOfferingPoppedUp)
+		event, err := NewEventServiceOfferingPoppedUp([2]string{topics[0], topics[1]})
+		failOnErr(err, "Can't create EventServiceOfferingPoppedUp")
+		cmpU256(event.OfferingHash, u256Zero, "ServiceOfferingPoppedUp: offering hash is unexpected")
+	}
 
-			if err != nil {
-				t.Fatal("Can't create event NewEventChannelToppedUp: ", err)
-			}
+	{
+		topics, data := fetchEventData(EthCooperativeChannelClose)
+		event, err := NewEventCooperativeChannelClose([4]string{topics[0], topics[1], topics[2], topics[3]}, data)
+		failOnErr(err, "Can't create EventCooperativeChannelClose")
 
-			agentAddress := event.Agent.Bytes()
-			if bytes.Compare(agentAddress[:], testEthAddress1[:]) != 0 {
-				t.Fatal()
-			}
+		client := event.Client.Bytes()
+		agent := event.Agent.Bytes()
 
-			if event.OfferingHash.String() != testUint256Zero.String() {
-				t.Fatal()
-			}
+		cmpBytes(client[:], addr1[:], "CooperativeChannelClose: client is unexpected")
+		cmpBytes(agent[:], addr2[:], "CooperativeChannelClose: agent is unexpected")
+		cmpU256(event.OpenBlockNumber, u256Zero, "CooperativeChannelClose: open block number is unexpected")
+		cmpU256(event.OfferingHash, u256Full, "CooperativeChannelClose: offering hash is unexpected")
+		cmpU192(event.Balance, u192Zero, "CooperativeChannelClose: balance is unexpected")
+	}
 
-			if event.MinDeposit.String() != testUint192Zero.String() {
-				t.Fatal()
-			}
+	{
+		topics, data := fetchEventData(EthUncooperativeChannelClose)
+		event, err := NewEventUnCooperativeChannelClose([4]string{topics[0], topics[1], topics[2], topics[3]}, data)
+		failOnErr(err, "Can't create EventUnCooperativeChannelClose")
 
-			if event.CurrentSupply.String() != testUint192Zero.String() {
-				t.Fatal()
-			}
-		}
+		client := event.Client.Bytes()
+		agent := event.Agent.Bytes()
 
-		{
-			topics, _ := getEvent(EthOfferingDeleted)
-			event, err := NewEventServiceOfferingDeleted([2]string{topics[0], topics[1]})
-
-			if err != nil {
-				t.Fatal("Can't create event NewEventServiceOfferingDeleted: ", err)
-			}
-
-			if event.OfferingHash.String() != testUint256Zero.String() {
-				t.Fatal()
-			}
-		}
-
-		{
-			topics, data := getEvent(EthServiceOfferingEndpoint)
-			event, err := NewEventServiceOfferingEndpoint(
-				[4]string{topics[0], topics[1], topics[2], topics[3]}, data)
-
-			if err != nil {
-				t.Fatal("Can't create event NewEventServiceOfferingEndpoint: ", err)
-			}
-
-			clientAddress := event.Client.Bytes()
-			if bytes.Compare(clientAddress[:], testEthAddress1[:]) != 0 {
-				t.Fatal()
-			}
-
-			if event.OfferingHash.String() != testUint256Zero.String() {
-				t.Fatal()
-			}
-
-			if event.OpenBlockNumber.String() != testUint256Zero.String() {
-				t.Fatal()
-			}
-
-			if event.EndpointHash.String() != testUint256Full.String() {
-				t.Fatal()
-			}
-		}
-
-		{
-			topics, data := getEvent(EthServiceOfferingSupplyChanged)
-			event, err := NewEventServiceOfferingSupplyChanged(
-				[2]string{topics[0], topics[1]}, data)
-
-			if err != nil {
-				t.Fatal("Can't create event NewEventServiceOfferingSupplyChanged: ", err)
-			}
-
-			if event.OfferingHash.String() != testUint256Zero.String() {
-				t.Fatal()
-			}
-
-			if event.CurrentSupply.String() != testUint192Zero.String() {
-				t.Fatal()
-			}
-		}
-
-		{
-			topics, _ := getEvent(EthServiceOfferingPoppedUp)
-			event, err := NewEventServiceOfferingPoppedUp(
-				[2]string{topics[0], topics[1]})
-
-			if err != nil {
-				t.Fatal("Can't create event NewEventServiceOfferingPoppedUp: ", err)
-			}
-
-			if event.OfferingHash.String() != testUint256Zero.String() {
-				t.Fatal()
-			}
-		}
-
-		{
-			topics, data := getEvent(EthCooperativeChannelClose)
-			event, err := NewEventCooperativeChannelClose(
-				[4]string{topics[0], topics[1], topics[2], topics[3]}, data)
-
-			if err != nil {
-				t.Fatal("Can't create event NewEventCooperativeChannelClose: ", err)
-			}
-
-			// Comparing received parameters with originally sent values.
-			clientAddress := event.Client.Bytes()
-			if bytes.Compare(clientAddress[:], testEthAddress1[:]) != 0 {
-				t.Fatal()
-			}
-
-			agentAddress := event.Agent.Bytes()
-			if bytes.Compare(agentAddress[:], testEthAddress2[:]) != 0 {
-				t.Fatal()
-			}
-
-			if event.OpenBlockNumber.String() != testUint256Zero.String() {
-				t.Fatal()
-			}
-
-			if event.OfferingHash.String() != testUint256Full.String() {
-				t.Fatal()
-			}
-
-			if event.Balance.String() != testUint192Zero.String() {
-				t.Fatal()
-			}
-		}
-
-		{
-			topics, data := getEvent(EthUncooperativeChannelClose)
-			event, err := NewEventUnCooperativeChannelClose(
-				[4]string{topics[0], topics[1], topics[2], topics[3]}, data)
-
-			if err != nil {
-				t.Fatal("Can't create event NewEventUnCooperativeChannelClose: ", err)
-			}
-
-			// Comparing received parameters with originally sent values.
-			clientAddress := event.Client.Bytes()
-			if bytes.Compare(clientAddress[:], testEthAddress1[:]) != 0 {
-				t.Fatal()
-			}
-
-			agentAddress := event.Agent.Bytes()
-			if bytes.Compare(agentAddress[:], testEthAddress2[:]) != 0 {
-				t.Fatal()
-			}
-
-			if event.OpenBlockNumber.String() != testUint256Zero.String() {
-				t.Fatal()
-			}
-
-			if event.OfferingHash.String() != testUint256Full.String() {
-				t.Fatal()
-			}
-
-			if event.Balance.String() != testUint192Zero.String() {
-				t.Fatal()
-			}
-		}
+		cmpBytes(client[:], addr1[:], "UnCooperativeChannelClose: client is unexpected")
+		cmpBytes(agent[:], addr2[:], "UnCooperativeChannelClose: agent is unexpected")
+		cmpU256(event.OpenBlockNumber, u256Zero, "UnCooperativeChannelClose: open block number is unexpected")
+		cmpU256(event.OfferingHash, u256Full, "UnCooperativeChannelClose: offering hash is unexpected")
+		cmpU192(event.Balance, u192Zero, "UnCooperativeChannelClose: balance is unexpected")
 	}
 }
 
 func TestNegativeLogsFetching(t *testing.T) {
+	failIfNoError := func(err error, args... interface{}) {
+		if err == nil {
+			t.Fatal(args)
+		}
+	}
+
 	node := tests.GethEthereumConfig().Geth
 	client := NewEthereumClient(node.Host, node.Port)
 
-	{
-		// Test purpose:
-		// To check that no logs fetching is done, if no contract address is specified.
+	_, err := client.GetLogs("", []string{"0x0"}, "", "")
+	failIfNoError(err, "Error must be returned")
 
-		_, err := client.GetLogs("", []string{"0x0"}, "", "")
-		if err == nil {
-			t.Fatal("Error must be returned")
-		}
-	}
+	_, err = client.GetLogs(fetchPSCAddress(), []string{"0x0"}, "", "")
+	failIfNoError(err, "Error must be returned")
 
-	{
-		// Test purpose:
-		// To check that no logs fetching is done, if invalid topics are transferred.
-
-		_, err := client.GetLogs(fetchPSCAddress(), []string{"0x0"}, "", "")
-		if err == nil {
-			t.Fatal("Error must be returned")
-		}
-	}
-
-	{
-		// Test purpose:
-		// To check that no logs fetching is done, if invalid topics are transferred.
-
-		_, err := client.GetLogs(fetchPSCAddress(), []string{"", ""}, "", "")
-		if err == nil {
-			t.Fatal("Error must be returned")
-		}
-	}
+	_, err = client.GetLogs(fetchPSCAddress(), []string{"", ""}, "", "")
+	failIfNoError(err, "Error must be returned")
 }
 
 func TestLogsFetchingWithBrokenNetwork(t *testing.T) {
@@ -497,12 +320,7 @@ func TestLogsFetchingWithBrokenNetwork(t *testing.T) {
 	client := NewEthereumClient(node.Host, node.Port+1) // note: invalid port is used
 
 	{
-		// Test purpose:
-		// To check that error is emitted in case if network is not operable.
-
-		_, err := client.GetLogs(
-			fetchPSCAddress(),
-			[]string{EthOfferingCreated}, "", "")
+		_, err := client.GetLogs(fetchPSCAddress(),[]string{EthOfferingCreated}, "", "")
 		if err == nil {
 			t.Fatal("Error must be returned")
 		}
