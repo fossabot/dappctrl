@@ -50,6 +50,7 @@ CREATE TABLE offerings_vpn(
 -- State channel states.
 CREATE TYPE channel_state AS ENUM (
     'open',
+    'closing',
     'closed_coop',
     'closed_uncoop'
 );
@@ -64,7 +65,7 @@ CREATE TABLE channels (
     state channel_state NOT NULL,
     total_deposit privatix_tokens NOT NULL,
     closed_deposit privatix_tokens NOT NULL,
-    solt bigint NOT NULL,
+    salt bigint NOT NULL,
     password sha3_256 NOT NULL,
     receipt_balance privatix_tokens NOT NULL,
     receipt_signature text NOT NULL
@@ -74,16 +75,16 @@ CREATE TABLE channels (
 CREATE TABLE sessions (
     id uuid PRIMARY KEY,
     channel uuid NOT NULL REFERENCES channels(id),
-    started timestamp with time zone,
+    started timestamp with time zone NOT NULL,
     stopped timestamp with time zone
 );
 
 -- Client sessions for VPN service.
 CREATE TABLE sessions_vpn (
     id uuid PRIMARY KEY REFERENCES sessions(id),
-    server_ip inet,
-    client_ip inet,
-    client_port int,
+    server_ip inet NOT NULL,
+    client_ip inet NOT NULL,
+    client_port int NOT NULL,
     uploaded bigint NOT NULL,
     downloaded bigint NOT NULL
 );

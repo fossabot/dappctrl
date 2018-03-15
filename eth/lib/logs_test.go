@@ -11,8 +11,8 @@ import (
 	"log"
 	"math/big"
 	"net/http"
-	"pxctrl/eth/contract"
-	"pxctrl/eth/lib/tests"
+	"eth/contract"
+	"eth/lib/tests"
 	"testing"
 )
 
@@ -83,7 +83,7 @@ func fetchTestPrivateKey() string {
 }
 
 func populateEvents() {
-	failOnErr := func(err error, args... interface{}) {
+	failOnErr := func(err error, args ...interface{}) {
 		if err != nil {
 			log.Fatal(args, " / Error details: ", err)
 		}
@@ -146,7 +146,7 @@ func TestNormalLogsFetching(t *testing.T) {
 	node := tests.GethEthereumConfig().Geth
 	client := NewEthereumClient(node.Host, node.Port)
 
-	failOnErr := func(err error, args... interface{}) {
+	failOnErr := func(err error, args ...interface{}) {
 		if err != nil {
 			t.Fatal(args, " / Error details: ", err)
 		}
@@ -292,7 +292,7 @@ func TestNormalLogsFetching(t *testing.T) {
 }
 
 func TestNegativeLogsFetching(t *testing.T) {
-	failIfNoError := func(err error, args... interface{}) {
+	failIfNoError := func(err error, args ...interface{}) {
 		if err == nil {
 			t.Fatal(args)
 		}
@@ -316,7 +316,7 @@ func TestLogsFetchingWithBrokenNetwork(t *testing.T) {
 	client := NewEthereumClient(node.Host, node.Port+1) // Note: invalid port is used.
 
 	{
-		_, err := client.GetLogs(fetchPSCAddress(),[]string{EthOfferingCreated}, "", "")
+		_, err := client.GetLogs(fetchPSCAddress(), []string{EthOfferingCreated}, "", "")
 		if err == nil {
 			t.Fatal("Error must be returned")
 		}

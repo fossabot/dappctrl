@@ -10,10 +10,18 @@
         "Level": "info"
     },
 
+    "PaymentServer": {
+        "Addr": "localhost:9000",
+        "TLS": null
+    },
+
+    "VPNMonitor": {
+        "Addr": "localhost:7505",
+        "ByteCountPeriod": 5
+    },
+
     "VPNServer": {
-        "Addr": "0.0.0.0:8080",
-        "CertFile": "dappctrl.cert",
-        "KeyFile": "dappctrl.key",
-        "TLS": false
+        "Addr": "localhost:8080",
+        "TLS": null
     }
 }

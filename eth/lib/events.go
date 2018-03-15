@@ -24,14 +24,10 @@ const (
 	EthUncooperativeChannelClose    = "8a79bd24ee9bcfd977d6fc685befa8775c8a933f0abe82ab73b716cf419f968e"
 )
 
-//---------------------------------------------------------------------------------------------------------------------
-
 // Base interface for all events, that are expected to be received from the ethereum block-chain.
 type Event interface {
 	Digest() string
 }
-
-//---------------------------------------------------------------------------------------------------------------------
 
 // todo: here and elsewhere: To clearly deliver the meaning, I would suggest to change naming style here and in other place from NewEventServiceOfferingCreated to NewServiceOfferingCreatedEvent
 type EventChannelCreated struct {
@@ -123,8 +119,6 @@ func (e *EventChannelCreated) Digest() string {
 	return EthDigestChannelCreated
 }
 
-//---------------------------------------------------------------------------------------------------------------------
-
 type EventChannelToppedUp struct {
 	Client          *Address // Indexed.
 	Agent           *Address // Indexed.
@@ -209,8 +203,6 @@ func (e *EventChannelToppedUp) Digest() string {
 	return EthDigestChannelToppedUp
 }
 
-//---------------------------------------------------------------------------------------------------------------------
-
 type EventChannelCloseRequested struct {
 	Client          *Address // Indexed.
 	Agent           *Address // Indexed.
@@ -226,8 +218,6 @@ func NewEventChannelCloseRequested(topics [4]string, hexData string) (*EventChan
 func (e *EventChannelCloseRequested) Digest() string {
 	return EthChannelCloseRequested
 }
-
-//---------------------------------------------------------------------------------------------------------------------
 
 type EventOfferingCreated struct {
 	Agent         *Address // Indexed.
@@ -305,8 +295,6 @@ func (e *EventOfferingCreated) Digest() string {
 	return EthOfferingCreated
 }
 
-//---------------------------------------------------------------------------------------------------------------------
-
 type EventOfferingDeleted struct {
 	OfferingHash *Uint256 // Indexed.
 }
@@ -343,8 +331,6 @@ func NewEventServiceOfferingDeleted(topics [2]string) (*EventOfferingDeleted, er
 func (e *EventOfferingDeleted) Digest() string {
 	return EthOfferingDeleted
 }
-
-//---------------------------------------------------------------------------------------------------------------------
 
 type EventOfferingEndpoint struct {
 	Client          *Address // Indexed.
@@ -414,8 +400,6 @@ func (e *EventOfferingEndpoint) Digest() string {
 	return EthServiceOfferingEndpoint
 }
 
-//---------------------------------------------------------------------------------------------------------------------
-
 type EventOfferingSupplyChanged struct {
 	OfferingHash  *Uint256 // Indexed.
 	CurrentSupply *Uint192
@@ -466,8 +450,6 @@ func (e *EventOfferingSupplyChanged) Digest() string {
 	return EthServiceOfferingSupplyChanged
 }
 
-//---------------------------------------------------------------------------------------------------------------------
-
 type EventOfferingPoppedUp struct {
 	OfferingHash *Uint256 // Indexed.
 }
@@ -504,8 +486,6 @@ func NewEventServiceOfferingPoppedUp(topics [2]string) (*EventOfferingPoppedUp, 
 func (e *EventOfferingPoppedUp) Digest() string {
 	return EthServiceOfferingPoppedUp
 }
-
-//---------------------------------------------------------------------------------------------------------------------
 
 type EventCooperativeChannelClose struct {
 	Client          *Address // Indexed.
@@ -563,7 +543,7 @@ func NewEventCooperativeChannelClose(topics [4]string, hexData string) (*EventCo
 
 	{
 		// Offering hash parsing (data field).
-		offsetFrom := 2  // "0x...".
+		offsetFrom := 2 // "0x...".
 		offsetTo := offsetFrom + 64
 		event.OfferingHash, err = NewUint256(hexData[offsetFrom:offsetTo])
 		if err != nil {
@@ -590,8 +570,6 @@ func NewEventCooperativeChannelClose(topics [4]string, hexData string) (*EventCo
 func (e *EventCooperativeChannelClose) Digest() string {
 	return EthCooperativeChannelClose
 }
-
-//---------------------------------------------------------------------------------------------------------------------
 
 type EventUncooperativeChannelClose struct {
 	Client          *Address // Indexed.
@@ -649,7 +627,7 @@ func NewEventUnCooperativeChannelClose(topics [4]string, hexData string) (*Event
 
 	{
 		// Offering hash parsing (data field).
-		offsetFrom := 2  // "0x...".
+		offsetFrom := 2 // "0x...".
 		offsetTo := offsetFrom + 64
 		event.OfferingHash, err = NewUint256(hexData[offsetFrom:offsetTo])
 		if err != nil {
@@ -676,8 +654,6 @@ func NewEventUnCooperativeChannelClose(topics [4]string, hexData string) (*Event
 func (e *EventUncooperativeChannelClose) Digest() string {
 	return EthUncooperativeChannelClose
 }
-
-//---------------------------------------------------------------------------------------------------------------------
 
 func errorUnexpectedEventType(receivedDigest, expectedDigest string) error {
 	return fmt.Errorf("unexpected event type occurred: %s, but %s is expected", receivedDigest, expectedDigest)

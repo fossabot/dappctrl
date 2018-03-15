@@ -51,8 +51,6 @@ func (a *Address) Bytes() [addressBytesLength]byte {
 	return a.bytes
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-
 // todo: try to use type Uint256s *BigInt instead of current realisation.
 type Uint256 struct {
 	number *big.Int
@@ -102,7 +100,6 @@ func (i *Uint256) ToBigInt() *big.Int {
 	return i.number
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
 
 // todo: try to use type Uint192 *BigInt instead of current realisation.
 type Uint192 struct {
