@@ -38,14 +38,14 @@ func NewAddress(hexRepresentation string) (*Address, error) {
 
 // Tests: types_test.go/TestAddressCreating
 // (this method is used for checking address creation correctness,
-// so no separated tests are needed)
+// so no separated tests are needed).
 func (a *Address) String() string {
 	return fmt.Sprintf("%#x", a.bytes)
 }
 
 // Tests: types_test.go/TestAddressCreating
 // (String() uses a.bytes for hex representation,
-// in case if it is malformed - String() tests would fail)
+// in case if it is malformed - String() tests would fail).
 func (a *Address) Bytes() [addressBytesLength]byte {
 	return a.bytes
 }

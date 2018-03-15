@@ -49,11 +49,11 @@ func (e *EthereumClient) GetLogs(contractAddress string, topics []string, fromBl
 		toBlock = "latest"
 	}
 
-	// note: topics are not checked for emptiness,
+	// Note: topics are not checked for emptiness,
 	// because empty topics are allowed by the geth-API:
 	// in this case all events of the contract would be returned.
 	for _, topic := range topics {
-		const kTopicLength = 2 + 64  // "0x" + 64 symbols (256 bits in hex)
+		const kTopicLength = 2 + 64  // "0x" + 64 symbols (256 bits in hex).
 		if len(topic) != kTopicLength {
 			return nil, errors.New("invalid topic occurred: " + topic)
 		}

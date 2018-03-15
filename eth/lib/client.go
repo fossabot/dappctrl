@@ -21,16 +21,18 @@ import (
 	"time"
 )
 
+// Implementation of client logic for the ethereum geth node.
+// Uses JSON RPC API of geth for communication with remote node.
 type EthereumClient struct {
 	Host string
 	Port uint16
 
 	client    http.Client
 	requestID uint64
-
-	privateKeyPath string
 }
 
+// NewEthereumClient creates and returns instance of client for remote ethereum node,
+// that is available via specified host and port.
 func NewEthereumClient(host string, port uint16) *EthereumClient {
 	return &EthereumClient{
 		Host: host,
@@ -38,7 +40,7 @@ func NewEthereumClient(host string, port uint16) *EthereumClient {
 
 		// By default, standard http-client does not uses any timeout for its operations.
 		// But, there is non zero probability, that remote geth-node would hang for a long time.
-		// To avoid cascade client/agent side application hangs - timeout is used.
+		// To avoid cascade client/agent side application hangs - custom timeout is used.
 		client: http.Client{
 			Timeout: time.Second * 5,
 		},
@@ -90,6 +92,8 @@ func (e *EthereumClient) fetch(method, params string, result interface{}) error 
 	return nil
 }
 
+// providerURL concatenates client host and port into http url,
+// that might be used for connecting to the remote node via JSON RPC.
 func (e *EthereumClient) providerURL() string {
 	return "http://" + e.Host + ":" + fmt.Sprint(e.Port)
 }

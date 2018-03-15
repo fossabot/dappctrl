@@ -21,7 +21,6 @@ var (
 	PSCAddress = ""
 
 	// Test sets of dummy data.
-	// Used as placeholders for parameters is contract methods calls.
 	addr1       = [20]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	addr2       = [20]byte{255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}
 	b32Zero     = [32]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
@@ -30,9 +29,6 @@ var (
 	u256Full, _ = NewUint256("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
 	u192Zero, _ = NewUint192("0")
 )
-
-// Internal methods
-//---------------------------------------------------------------------------------------------------------------------
 
 // fetchPSCAddress returns address of PSC is the currently active test chain.
 // is case of successfully retrieved address  - caches retrieved address and returns it on the next calls,
@@ -317,7 +313,7 @@ func TestNegativeLogsFetching(t *testing.T) {
 
 func TestLogsFetchingWithBrokenNetwork(t *testing.T) {
 	node := tests.GethEthereumConfig().Geth
-	client := NewEthereumClient(node.Host, node.Port+1) // note: invalid port is used
+	client := NewEthereumClient(node.Host, node.Port+1) // Note: invalid port is used.
 
 	{
 		_, err := client.GetLogs(fetchPSCAddress(),[]string{EthOfferingCreated}, "", "")
