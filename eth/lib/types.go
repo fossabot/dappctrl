@@ -9,6 +9,7 @@ import (
 
 const addressBytesLength = 20
 
+// todo: try to use type Address [20]byte instead of current realisation.
 type Address struct {
 	bytes [addressBytesLength]byte
 }
@@ -52,6 +53,7 @@ func (a *Address) Bytes() [addressBytesLength]byte {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+// todo: try to use type Uint256s *BigInt instead of current realisation.
 type Uint256 struct {
 	number *big.Int
 }
@@ -102,6 +104,7 @@ func (i *Uint256) ToBigInt() *big.Int {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+// todo: try to use type Uint192 *BigInt instead of current realisation.
 type Uint192 struct {
 	number *big.Int
 }
