@@ -12,7 +12,8 @@ but it is necessary to repeat `npm update` on each repository change,
 because there might be new dependencies added.
 
 1. Clone https://github.com/Privatix/dapp-smart-contract
-1. `npm install` or `npm update` (no `-g` param is needed)
+1. Go to the `dapp-smart-contract-private/psc`
+and run `npm install` or `npm update` (no `-g` param is needed)
 1. ensure node.js version is 9+ (`node -v`)
 
 ### GO test env. setup
@@ -27,3 +28,9 @@ and geth node should be available on port `8545`.
 1. Ensure test API is up and running: `TARGET=dev npm run dev`;
 1. Wait some period of time (5-10 sec);
 1. `go test pxctrl/eth/lib`
+
+### Troubleshooting
+* *Can't fetch private key. It seems that test environment is broken*
+
+Please, check if test API is run and running.
+Use commands `npm run stop` and `TARGET=dev npm run dev` to restart test environment.
