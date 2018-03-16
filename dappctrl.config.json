@@ -15,6 +15,10 @@
         "TLS": null
     },
 
+    "SOMC": {
+        "URL": "ws://89.38.96.53"
+    },
+
     "VPNMonitor": {
         "Addr": "localhost:7505",
         "ByteCountPeriod": 5
