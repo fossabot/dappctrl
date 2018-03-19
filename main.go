@@ -25,6 +25,7 @@ func newConfig() *config {
 	return &config{
 		DB:         data.NewDBConfig(),
 		Log:        util.NewLogConfig(),
+		SOMC:       somc.NewConfig(),
 		VPNServer:  vpnsrv.NewConfig(),
 		VPNMonitor: vpnmon.NewConfig(),
 	}
@@ -57,21 +58,13 @@ func main() {
 		logger.Fatal("failed to serve vpn session requests: %s",
 			srv.ListenAndServe())
 	}()
-	/*
-		mon := vpnmon.NewMonitor(conf.VPNMonitor, logger, db)
-		defer mon.Close()
-		go func() {
-			logger.Fatal("failed to monitor vpn traffic: %s\n",
-				mon.MonitorTraffic())
-		}()
-	*/
-	conn, err := somc.NewConn(conf.SOMC, logger)
-	if err != nil {
-		logger.Fatal("failed to connect to SOMC: %s", err)
-	}
-	defer conn.Close()
 
-	conn.PublishOffering([]byte("{}"))
+	mon := vpnmon.NewMonitor(conf.VPNMonitor, logger, db)
+	defer mon.Close()
+	go func() {
+		logger.Fatal("failed to monitor vpn traffic: %s\n",
+			mon.MonitorTraffic())
+	}()
 
 	pmt := payment.NewServer(conf.PaymentServer, logger, db)
 	logger.Fatal("failed to start payment server: %s",
