@@ -40,79 +40,18 @@ type EventChannelCreated struct {
 
 func NewEventChannelCreated(topics [4]string, hexData string) (*EventChannelCreated, error) {
 	var err error
-	event := &EventChannelCreated{}
+	e := &EventChannelCreated{}
 
 	err = validateTopics(topics[:])
-	if err != nil {
-		return nil, err
-	}
+	err = checkEventDigest(topics[0], e.Digest(), err)
 
-	{
-		// Event digest parsing.
-		digestHex := topics[0][2:] // Skipping "0x".
-		if digestHex != event.Digest() {
-			return nil, errorUnexpectedEventType(digestHex, event.Digest())
-		}
-	}
+	e.Client, err = parseAddress(topics[1], err)
+	e.Agent, err = parseAddress(topics[2], err)
+	e.OfferingHash, err = parseTopicAsUint256(topics[3], err)
 
-	{
-		// Client address parsing.
-		clientAddressHex := topics[1][2:] // Skipping "0x".
-		offsetFrom := 24                  // Skipping first 24 bytes from 64.
-		event.Client, err = NewAddress(clientAddressHex[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Agent address parsing.
-		agentAddressHex := topics[2][2:] // Skipping "0x".
-		offsetFrom := 24                 // Skipping first 24 bytes from 64.
-		event.Agent, err = NewAddress(agentAddressHex[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Offering hash parsing.
-		offeringHashHex := topics[3][2:]
-		event.OfferingHash, err = NewUint256(offeringHashHex)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Deposit parsing (data field).
-		offsetFrom :=
-			2 + // "0x..."
-				16 - // topic length is 256 bits, but we need only 192 (first 16 bytes are omitted).
-				1 // indexing is starting from zero.
-
-		offsetTo := offsetFrom +
-			48 // we need 48 bytes.
-
-		event.Deposit, err = NewUint192(hexData[offsetFrom:offsetTo])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Authenticated hash parsing (data field).
-		offsetFrom :=
-			2 + // "0x...".
-				64 // deposit amount encoded into 256 bits.
-
-		event.AuthenticatedHash, err = NewUint256(hexData[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return event, nil
+	e.Deposit, err = parseDataFieldAsUint192(hexData, 0, err)
+	e.AuthenticatedHash, err = parseDataFieldAsUint256(hexData, 1, err)
+	return e, err
 }
 
 func (e *EventChannelCreated) Digest() string {
@@ -129,74 +68,18 @@ type EventChannelToppedUp struct {
 
 func NewEventChannelToppedUp(topics [4]string, hexData string) (*EventChannelToppedUp, error) {
 	var err error
-	event := &EventChannelToppedUp{}
+	e := &EventChannelToppedUp{}
 
 	err = validateTopics(topics[:])
-	if err != nil {
-		return nil, err
-	}
+	err = checkEventDigest(topics[0], e.Digest(), err)
 
-	{
-		// Event digest parsing.
-		digestHex := topics[0][2:] // Skipping "0x".
-		if digestHex != event.Digest() {
-			return nil, errorUnexpectedEventType(digestHex, event.Digest())
-		}
-	}
+	e.Client, err = parseAddress(topics[1], err)
+	e.Agent, err = parseAddress(topics[2], err)
+	e.OpenBlockNumber, err = parseTopicAsUint256(topics[3], err)
 
-	{
-		// Client address parsing.
-		clientAddressHex := topics[1][2:] // Skipping "0x".
-		offsetFrom := 24                  // Skipping first 24 bytes from 64.
-		event.Client, err = NewAddress(clientAddressHex[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Agent address parsing.
-		agentAddressHex := topics[2][2:] // skipping "0x".
-		offsetFrom := 24                 // skipping first 24 bytes from 64.
-		event.Agent, err = NewAddress(agentAddressHex[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Open block number parsing.
-		openBlockNumberHex := topics[3][2:]
-		event.OpenBlockNumber, err = NewUint256(openBlockNumberHex)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Offering hash parsing (data field).
-		offsetFrom := 2             // "0x...".
-		offsetTo := offsetFrom + 64 // we need 48 bytes.
-		event.OfferingHash, err = NewUint256(hexData[offsetFrom:offsetTo])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Added deposit parsing (data field).
-		offsetFrom :=
-			2 + // "0x...".
-				64 + // offering hash field.
-				16 // only 192 bites are used (from the end).
-
-		event.AddedDeposit, err = NewUint192(hexData[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return event, nil
+	e.OfferingHash, err = parseDataFieldAsUint256(hexData, 0, err)
+	e.AddedDeposit, err = parseDataFieldAsUint192(hexData, 1, err)
+	return e, err
 }
 
 func (e *EventChannelToppedUp) Digest() string {
@@ -228,67 +111,17 @@ type EventOfferingCreated struct {
 
 func NewEventServiceOfferingCreated(topics [3]string, hexData string) (*EventOfferingCreated, error) {
 	var err error
-	event := &EventOfferingCreated{}
+	e := &EventOfferingCreated{}
 
 	err = validateTopics(topics[:])
-	if err != nil {
-		return nil, err
-	}
+	err = checkEventDigest(topics[0], e.Digest(), err)
 
-	{
-		// Event digest parsing.
-		digestHex := topics[0][2:] // Skipping "0x".
-		if digestHex != event.Digest() {
-			return nil, errorUnexpectedEventType(digestHex, event.Digest())
-		}
-	}
+	e.Agent, err = parseAddress(topics[1], err)
+	e.OfferingHash, err = parseTopicAsUint256(topics[2], err)
 
-	{
-		// Agent address parsing.
-		agentAddressHex := topics[1][2:] // Skipping "0x".
-		offsetFrom := 24                 // Skipping first 24 bytes from 64.
-		event.Agent, err = NewAddress(agentAddressHex[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Offering hash parsing.
-		offeringHashHex := topics[2][2:] // Skipping "0x".
-		event.OfferingHash, err = NewUint256(offeringHashHex)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Min deposit parsing (data field).
-		offsetFrom :=
-			2 + // "0x...".
-				16 // Only 192 bites are used (from the end).
-
-		offsetTo := offsetFrom + 48
-		event.MinDeposit, err = NewUint192(hexData[offsetFrom:offsetTo])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Current supply (data field).
-		offsetFrom :=
-			2 + // "0x...".
-				64 + // min deposit field.
-				16 // only 192 bites are used (from the end).
-
-		event.CurrentSupply, err = NewUint192(hexData[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return event, nil
+	e.MinDeposit, err = parseDataFieldAsUint192(hexData, 0, err)
+	e.CurrentSupply, err = parseDataFieldAsUint192(hexData, 1, err)
+	return e, err
 }
 
 func (e *EventOfferingCreated) Digest() string {
@@ -301,31 +134,13 @@ type EventOfferingDeleted struct {
 
 func NewEventServiceOfferingDeleted(topics [2]string) (*EventOfferingDeleted, error) {
 	var err error
-	event := &EventOfferingDeleted{}
+	e := &EventOfferingDeleted{}
 
 	err = validateTopics(topics[:])
-	if err != nil {
-		return nil, err
-	}
+	err = checkEventDigest(topics[0], e.Digest(), err)
 
-	{
-		// Event digest parsing.
-		digestHex := topics[0][2:] // Skipping "0x".
-		if digestHex != event.Digest() {
-			return nil, errorUnexpectedEventType(digestHex, event.Digest())
-		}
-	}
-
-	{
-		// Offering hash parsing.
-		offeringHashHex := topics[1][2:] // Skipping "0x".
-		event.OfferingHash, err = NewUint256(offeringHashHex)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return event, nil
+	e.OfferingHash, err = parseTopicAsUint256(topics[1], err)
+	return e, err
 }
 
 func (e *EventOfferingDeleted) Digest() string {
@@ -341,59 +156,17 @@ type EventOfferingEndpoint struct {
 
 func NewEventServiceOfferingEndpoint(topics [4]string, hexData string) (*EventOfferingEndpoint, error) {
 	var err error
-	event := &EventOfferingEndpoint{}
+	e := &EventOfferingEndpoint{}
 
 	err = validateTopics(topics[:])
-	if err != nil {
-		return nil, err
-	}
+	err = checkEventDigest(topics[0], e.Digest(), err)
 
-	{
-		// Event digest parsing.
-		digestHex := topics[0][2:] // Skipping "0x".
-		if digestHex != event.Digest() {
-			return nil, errorUnexpectedEventType(digestHex, event.Digest())
-		}
-	}
+	e.Client, err = parseAddress(topics[1], err)
+	e.OfferingHash, err = parseTopicAsUint256(topics[2], err)
+	e.OpenBlockNumber, err = parseTopicAsUint256(topics[3], err)
 
-	{
-		// Agent address parsing.
-		clientAddressHex := topics[1][2:] // Skipping "0x".
-		offsetFrom := 24                  // Skipping first 24 bytes from 64.
-		event.Client, err = NewAddress(clientAddressHex[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Offering hash parsing.
-		offeringHashHex := topics[2][2:] // Skipping "0x".
-		event.OfferingHash, err = NewUint256(offeringHashHex)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Open block number parsing.
-		openBlockNumberHex := topics[3][2:] // Skipping "0x".
-		event.OpenBlockNumber, err = NewUint256(openBlockNumberHex)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// endpoint hash (data field).
-		offsetFrom := 2 // "0x...".
-		event.EndpointHash, err = NewUint256(hexData[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return event, nil
+	e.EndpointHash, err = parseDataFieldAsUint256(hexData, 0, err)
+	return e, err
 }
 
 func (e *EventOfferingEndpoint) Digest() string {
@@ -407,43 +180,15 @@ type EventOfferingSupplyChanged struct {
 
 func NewEventServiceOfferingSupplyChanged(topics [2]string, hexData string) (*EventOfferingSupplyChanged, error) {
 	var err error
-	event := &EventOfferingSupplyChanged{}
+	e := &EventOfferingSupplyChanged{}
 
 	err = validateTopics(topics[:])
-	if err != nil {
-		return nil, err
-	}
+	err = checkEventDigest(topics[0], e.Digest(), err)
 
-	{
-		// Event digest parsing.
-		digestHex := topics[0][2:] // Skipping "0x".
-		if digestHex != event.Digest() {
-			return nil, errorUnexpectedEventType(digestHex, event.Digest())
-		}
-	}
+	e.OfferingHash, err = parseTopicAsUint256(topics[1], err)
 
-	{
-		// Offering hash parsing.
-		offeringHashHex := topics[1][2:] // Skipping "0x".
-		event.OfferingHash, err = NewUint256(offeringHashHex)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Current supply (data field).
-		offsetFrom :=
-			2 + // "0x...".
-				16 // Only 192 bites are used (from the end).
-
-		event.CurrentSupply, err = NewUint192(hexData[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return event, nil
+	e.CurrentSupply, err = parseDataFieldAsUint192(hexData, 0, err)
+	return e, err
 }
 
 func (e *EventOfferingSupplyChanged) Digest() string {
@@ -456,31 +201,13 @@ type EventOfferingPoppedUp struct {
 
 func NewEventServiceOfferingPoppedUp(topics [2]string) (*EventOfferingPoppedUp, error) {
 	var err error
-	event := &EventOfferingPoppedUp{}
+	e := &EventOfferingPoppedUp{}
 
 	err = validateTopics(topics[:])
-	if err != nil {
-		return nil, err
-	}
+	err = checkEventDigest(topics[0], e.Digest(), err)
 
-	{
-		// Event digest parsing.
-		digestHex := topics[0][2:] // Skipping "0x".
-		if digestHex != event.Digest() {
-			return nil, errorUnexpectedEventType(digestHex, event.Digest())
-		}
-	}
-
-	{
-		// Offering hash parsing.
-		offeringHashHex := topics[1][2:] // Skipping "0x".
-		event.OfferingHash, err = NewUint256(offeringHashHex)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return event, nil
+	e.OfferingHash, err = parseTopicAsUint256(topics[1], err)
+	return e, err
 }
 
 func (e *EventOfferingPoppedUp) Digest() string {
@@ -497,74 +224,18 @@ type EventCooperativeChannelClose struct {
 
 func NewEventCooperativeChannelClose(topics [4]string, hexData string) (*EventCooperativeChannelClose, error) {
 	var err error
-	event := &EventCooperativeChannelClose{}
+	e := &EventCooperativeChannelClose{}
 
 	err = validateTopics(topics[:])
-	if err != nil {
-		return nil, err
-	}
+	err = checkEventDigest(topics[0], e.Digest(), err)
 
-	{
-		// Event digest parsing.
-		digestHex := topics[0][2:] // Skipping "0x".
-		if digestHex != event.Digest() {
-			return nil, errorUnexpectedEventType(digestHex, event.Digest())
-		}
-	}
+	e.Client, err = parseAddress(topics[1], err)
+	e.Agent, err = parseAddress(topics[2], err)
+	e.OpenBlockNumber, err = parseTopicAsUint256(topics[3], err)
 
-	{
-		// Client address parsing.
-		clientAddressHex := topics[1][2:] // Skipping "0x".
-		offsetFrom := 24                  // Skipping first 24 bytes from 64.
-		event.Client, err = NewAddress(clientAddressHex[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Agent address parsing.
-		agentAddressHex := topics[2][2:] // Skipping "0x".
-		offsetFrom := 24                 // Skipping first 24 bytes from 64.
-		event.Agent, err = NewAddress(agentAddressHex[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Open block number parsing.
-		openBlockNumberHex := topics[3][2:] // Skipping "0x".
-		event.OpenBlockNumber, err = NewUint256(openBlockNumberHex)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Offering hash parsing (data field).
-		offsetFrom := 2 // "0x...".
-		offsetTo := offsetFrom + 64
-		event.OfferingHash, err = NewUint256(hexData[offsetFrom:offsetTo])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Balance parsing (data field).
-		offsetFrom :=
-			2 + // "0x...".
-				64 + // Min deposit field.
-				16 // Only 192 bites are used (from the end).
-
-		event.Balance, err = NewUint192(hexData[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return event, nil
+	e.OfferingHash, err = parseDataFieldAsUint256(hexData, 0, err)
+	e.Balance, err = parseDataFieldAsUint192(hexData, 1, err)
+	return e, err
 }
 
 func (e *EventCooperativeChannelClose) Digest() string {
@@ -581,74 +252,18 @@ type EventUncooperativeChannelClose struct {
 
 func NewEventUnCooperativeChannelClose(topics [4]string, hexData string) (*EventUncooperativeChannelClose, error) {
 	var err error
-	event := &EventUncooperativeChannelClose{}
+	e := &EventUncooperativeChannelClose{}
 
 	err = validateTopics(topics[:])
-	if err != nil {
-		return nil, err
-	}
+	err = checkEventDigest(topics[0], e.Digest(), err)
 
-	{
-		// Event digest parsing.
-		digestHex := topics[0][2:] // Skipping "0x".
-		if digestHex != event.Digest() {
-			return nil, errorUnexpectedEventType(digestHex, event.Digest())
-		}
-	}
+	e.Client, err = parseAddress(topics[1], err)
+	e.Agent, err = parseAddress(topics[2], err)
+	e.OpenBlockNumber, err = parseTopicAsUint256(topics[3], err)
 
-	{
-		// Client address parsing.
-		clientAddressHex := topics[1][2:] // Skipping "0x".
-		offsetFrom := 24                  // Skipping first 24 bytes from 64.
-		event.Client, err = NewAddress(clientAddressHex[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Agent address parsing.
-		agentAddressHex := topics[2][2:] // Skipping "0x".
-		offsetFrom := 24                 // Skipping first 24 bytes from 64.
-		event.Agent, err = NewAddress(agentAddressHex[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Open block number parsing.
-		openBlockNumberHex := topics[3][2:] // Skipping "0x".
-		event.OpenBlockNumber, err = NewUint256(openBlockNumberHex)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Offering hash parsing (data field).
-		offsetFrom := 2 // "0x...".
-		offsetTo := offsetFrom + 64
-		event.OfferingHash, err = NewUint256(hexData[offsetFrom:offsetTo])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	{
-		// Balance parsing (data field).
-		offsetFrom :=
-			2 + // "0x...".
-				64 + // Min deposit field.
-				16 // Only 192 bites are used (from the end).
-
-		event.Balance, err = NewUint192(hexData[offsetFrom:])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return event, nil
+	e.OfferingHash, err = parseDataFieldAsUint256(hexData, 0, err)
+	e.Balance, err = parseDataFieldAsUint192(hexData, 1, err)
+	return e, err
 }
 
 func (e *EventUncooperativeChannelClose) Digest() string {
@@ -671,4 +286,84 @@ func validateTopics(topics []string) error {
 	}
 
 	return nil
+}
+
+
+func checkEventDigest(topic string, expectedDigest string, err error) error {
+	if err != nil {
+		return err
+	}
+
+	digestHex := topicToHex(topic)
+	if digestHex != expectedDigest {
+		return errorUnexpectedEventType(digestHex, expectedDigest)
+	}
+
+	return nil
+}
+
+func parseAddress(topic string, err error) (*Address, error) {
+	if err != nil {
+		return nil, err
+	}
+
+	return NewAddress(toAddressHex(topicToHex(topic)))
+}
+
+func parseTopicAsUint256(topic string, err error) (*Uint256, error) {
+	if err != nil {
+		return nil, err
+	}
+
+	return NewUint256(topic)
+}
+
+func parseDataFieldAsUint256(hexData string, offset uint8, err error) (*Uint256, error) {
+	if err != nil {
+		return nil, err
+	}
+
+	return NewUint256(get256BitsDataField(hexData, offset))
+}
+
+func parseDataFieldAsUint192(hexData string, offset uint8, err error) (*Uint192, error) {
+	if err != nil {
+		return nil, err
+	}
+
+	return NewUint192(get192BitsDataField(hexData, offset))
+}
+
+
+func topicToHex(topic string) string {
+	if len(topic) <= 2 {
+		return ""
+	}
+	return topic[2:]
+}
+
+func toAddressHex(hex string) string {
+	if len(hex) <= 24 {
+		return ""
+	}
+	return hex[24:]
+}
+
+func get256BitsDataField(hexData string, offset uint8) string {
+	offsetFrom := 2+(offset*64) // skipping "0x"
+	offsetTo := offsetFrom + 64
+	if len(hexData) < int(offsetTo) {
+		return ""
+	}
+
+	return "0x" + hexData[offsetFrom:offsetTo]
+}
+
+func get192BitsDataField(hexData string, offset uint8) string {
+	dataField := get256BitsDataField(hexData, offset)
+	if len(dataField) < 18 {
+		return ""
+	}
+
+	return dataField[18:]
 }
